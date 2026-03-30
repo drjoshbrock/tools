@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solarized Palette Selector - Obsidian Theme Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #002b36;
+            color: #839496;
+            padding: 0.5rem;
+            font-size: 12px;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .header h1 {
+            color: #fdf6e3;
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 0.2rem;
+        }
+
+        .header p {
+            color: #93a1a1;
+            font-size: 0.7rem;
+        }
+
+        .container {
+            display: flex;
+            gap: 0.5rem;
+            height: calc(100vh - 3rem);
+        }
+
+        .column {
+            flex: 1;
+            background: rgba(7, 54, 66, 0.4);
+            border-radius: 6px;
+            padding: 0.5rem;
+            border: 1px solid rgba(131, 148, 150, 0.1);
+            overflow-y: auto;
+        }
+
+        .column-title {
+            color: #fdf6e3;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            background: rgba(7, 54, 66, 0.9);
+            padding: 0.3rem 0;
+            border-radius: 4px;
+        }
+
+        .color-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .color-item {
+            background: rgba(0, 43, 54, 0.6);
+            border-radius: 4px;
+            padding: 0.4rem;
+            border: 1px solid rgba(131, 148, 150, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .color-item:hover {
+            transform: translateY(-1px);
+            border-color: rgba(131, 148, 150, 0.3);
+        }
+
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .color-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .color-name {
+            color: #fdf6e3;
+            font-size: 0.75rem;
+            font-weight: 500;
+            min-width: 45px;
+        }
+
+        .color-role {
+            color: #93a1a1;
+            font-size: 0.65rem;
+            line-height: 1.1;
+            margin-bottom: 0.3rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hex-code {
+            display: block;
+            background: rgba(7, 54, 66, 0.8);
+            color: #268bd2;
+            padding: 0.2rem 0.3rem;
+            border-radius: 3px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 0.65rem;
+            cursor: pointer;
+            border: 1px solid rgba(38, 139, 210, 0.3);
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .hex-code:hover {
+            background: rgba(38, 139, 210, 0.1);
+            border-color: rgba(38, 139, 210, 0.5);
+        }
+
+        .toast {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(133, 153, 0, 0.95);
+            color: #fdf6e3;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transform: translateX(200px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* Custom scrollbar for webkit browsers */
+        .column::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .column::-webkit-scrollbar-track {
+            background: rgba(0, 43, 54, 0.3);
+            border-radius: 2px;
+        }
+
+        .column::-webkit-scrollbar-thumb {
+            background: rgba(131, 148, 150, 0.3);
+            border-radius: 2px;
+        }
+
+        .column::-webkit-scrollbar-thumb:hover {
+            background: rgba(131, 148, 150, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Solarized Palette</h1>
+        <p>Tap swatch or hex to copy</p>
+    </div>
+
+    <div class="container">
+        <div class="column">
+            <h2 class="column-title">Base Colors</h2>
+            <div class="color-list">
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #002b36;" onclick="copyToClipboard('#002b36')"></div>
+                        <div class="color-name">Base03</div>
+                    </div>
+                    <div class="color-role">Dark primary bg</div>
+                    <div class="hex-code" onclick="copyToClipboard('#002b36')">#002b36</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #073642;" onclick="copyToClipboard('#073642')"></div>
+                        <div class="color-name">Base02</div>
+                    </div>
+                    <div class="color-role">Dark secondary bg</div>
+                    <div class="hex-code" onclick="copyToClipboard('#073642')">#073642</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #586e75;" onclick="copyToClipboard('#586e75')"></div>
+                        <div class="color-name">Base01</div>
+                    </div>
+                    <div class="color-role">Dark secondary text</div>
+                    <div class="hex-code" onclick="copyToClipboard('#586e75')">#586e75</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #657b83;" onclick="copyToClipboard('#657b83')"></div>
+                        <div class="color-name">Base00</div>
+                    </div>
+                    <div class="color-role">Dark primary text</div>
+                    <div class="hex-code" onclick="copyToClipboard('#657b83')">#657b83</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #839496;" onclick="copyToClipboard('#839496')"></div>
+                        <div class="color-name">Base0</div>
+                    </div>
+                    <div class="color-role">Light primary text</div>
+                    <div class="hex-code" onclick="copyToClipboard('#839496')">#839496</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #93a1a1;" onclick="copyToClipboard('#93a1a1')"></div>
+                        <div class="color-name">Base1</div>
+                    </div>
+                    <div class="color-role">Light secondary text</div>
+                    <div class="hex-code" onclick="copyToClipboard('#93a1a1')">#93a1a1</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #eee8d5;" onclick="copyToClipboard('#eee8d5')"></div>
+                        <div class="color-name">Base2</div>
+                    </div>
+                    <div class="color-role">Light secondary bg</div>
+                    <div class="hex-code" onclick="copyToClipboard('#eee8d5')">#eee8d5</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #fdf6e3;" onclick="copyToClipboard('#fdf6e3')"></div>
+                        <div class="color-name">Base3</div>
+                    </div>
+                    <div class="color-role">Light primary bg</div>
+                    <div class="hex-code" onclick="copyToClipboard('#fdf6e3')">#fdf6e3</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <h2 class="column-title">Accent Colors</h2>
+            <div class="color-list">
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #b58900;" onclick="copyToClipboard('#b58900')"></div>
+                        <div class="color-name">Yellow</div>
+                    </div>
+                    <div class="color-role">Warnings, highlights</div>
+                    <div class="hex-code" onclick="copyToClipboard('#b58900')">#b58900</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #cb4b16;" onclick="copyToClipboard('#cb4b16')"></div>
+                        <div class="color-name">Orange</div>
+                    </div>
+                    <div class="color-role">Constants, tags</div>
+                    <div class="hex-code" onclick="copyToClipboard('#cb4b16')">#cb4b16</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #dc322f;" onclick="copyToClipboard('#dc322f')"></div>
+                        <div class="color-name">Red</div>
+                    </div>
+                    <div class="color-role">Errors, alerts</div>
+                    <div class="hex-code" onclick="copyToClipboard('#dc322f')">#dc322f</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #d33682;" onclick="copyToClipboard('#d33682')"></div>
+                        <div class="color-name">Magenta</div>
+                    </div>
+                    <div class="color-role">Keywords, operators</div>
+                    <div class="hex-code" onclick="copyToClipboard('#d33682')">#d33682</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #6c71c4;" onclick="copyToClipboard('#6c71c4')"></div>
+                        <div class="color-name">Violet</div>
+                    </div>
+                    <div class="color-role">Variables, headings</div>
+                    <div class="hex-code" onclick="copyToClipboard('#6c71c4')">#6c71c4</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #268bd2;" onclick="copyToClipboard('#268bd2')"></div>
+                        <div class="color-name">Blue</div>
+                    </div>
+                    <div class="color-role">Links, functions</div>
+                    <div class="hex-code" onclick="copyToClipboard('#268bd2')">#268bd2</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #2aa198;" onclick="copyToClipboard('#2aa198')"></div>
+                        <div class="color-name">Cyan</div>
+                    </div>
+                    <div class="color-role">Code blocks</div>
+                    <div class="hex-code" onclick="copyToClipboard('#2aa198')">#2aa198</div>
+                </div>
+
+                <div class="color-item">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: #859900;" onclick="copyToClipboard('#859900')"></div>
+                        <div class="color-name">Green</div>
+                    </div>
+                    <div class="color-role">Success, strings</div>
+                    <div class="hex-code" onclick="copyToClipboard('#859900')">#859900</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Copied!</div>
+
+    <script>
+        function copyToClipboard(hexCode) {
+            navigator.clipboard.writeText(hexCode).then(function() {
+                showToast();
+            }).catch(function(err) {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = hexCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast();
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
