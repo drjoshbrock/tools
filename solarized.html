@@ -72,29 +72,36 @@
 
         .mode-toggle {
             display: flex;
-            align-items: center;
-            gap: 0.4rem;
             background: var(--bg-secondary);
-            padding: 0.3rem 0.5rem;
-            border-radius: 20px;
+            border-radius: 6px;
             border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .mode-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.3rem 0.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
-        .mode-toggle:hover {
-            border-color: var(--border-hover);
+        .mode-btn:first-child {
+            border-right: 1px solid var(--border-color);
         }
 
-        .mode-toggle span {
-            font-size: 0.9rem;
+        .mode-btn.active {
+            background: var(--accent);
+            color: #fff;
         }
 
-        .mode-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .mode-btn:not(.active):hover {
+            background: var(--bg-tertiary);
         }
 
         .container {
@@ -291,9 +298,9 @@
 <body>
     <div class="header">
         <h1>Solarized Palette</h1>
-        <div class="mode-toggle" onclick="toggleMode()" tabindex="0" role="button" aria-label="Toggle light/dark mode">
-            <span class="mode-icon">🌙</span>
-            <span class="mode-label">Dark</span>
+        <div class="mode-toggle" role="group" aria-label="Color mode">
+            <button class="mode-btn active" id="dark-btn" onclick="setMode('dark')">🌙 Dark</button>
+            <button class="mode-btn" id="light-btn" onclick="setMode('light')">☀️ Light</button>
         </div>
     </div>
 
@@ -400,15 +407,18 @@
                 colors.accent.map((c, i) => createColorItem(c, i, 1)).join('');
         }
 
-        function toggleMode() {
-            isDarkMode = !isDarkMode;
+        function setMode(mode) {
+            isDarkMode = mode === 'dark';
             document.body.classList.toggle('light-mode', !isDarkMode);
             
-            const toggle = document.querySelector('.mode-toggle');
-            toggle.querySelector('.mode-icon').textContent = isDarkMode ? '🌙' : '☀️';
-            toggle.querySelector('.mode-label').textContent = isDarkMode ? 'Dark' : 'Light';
+            document.getElementById('dark-btn').classList.toggle('active', isDarkMode);
+            document.getElementById('light-btn').classList.toggle('active', !isDarkMode);
             
             document.querySelector('meta[name="theme-color"]').content = isDarkMode ? '#002b36' : '#fdf6e3';
+        }
+
+        function toggleMode() {
+            setMode(isDarkMode ? 'light' : 'dark');
         }
 
         function copyToClipboard(text) {
@@ -481,14 +491,6 @@
                         toggleMode();
                     }
                     break;
-            }
-        });
-
-        // Handle mode toggle keyboard activation
-        document.querySelector('.mode-toggle').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                toggleMode();
             }
         });
 
