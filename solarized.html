@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solarized Palette Selector - Obsidian Theme Design</title>
+    <title>Solarized Palette Selector</title>
+    <meta name="description" content="Color picker for Solarized theme design">
+    <meta name="theme-color" content="#002b36">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Solarized">
+    <link rel="manifest" href="solarized-manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23002b36' width='100' height='100' rx='20'/><circle fill='%23b58900' cx='50' cy='50' r='25'/></svg>">
     <style>
         * {
             margin: 0;
@@ -11,31 +18,83 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #002b36;
+            --bg-secondary: rgba(7, 54, 66, 0.4);
+            --bg-tertiary: rgba(0, 43, 54, 0.6);
+            --bg-input: rgba(7, 54, 66, 0.8);
+            --text-primary: #fdf6e3;
+            --text-secondary: #93a1a1;
+            --text-body: #839496;
+            --border-color: rgba(131, 148, 150, 0.1);
+            --border-hover: rgba(131, 148, 150, 0.3);
+            --accent: #268bd2;
+            --success: #859900;
+        }
+
+        body.light-mode {
+            --bg-primary: #fdf6e3;
+            --bg-secondary: rgba(238, 232, 213, 0.6);
+            --bg-tertiary: rgba(253, 246, 227, 0.8);
+            --bg-input: rgba(238, 232, 213, 0.9);
+            --text-primary: #002b36;
+            --text-secondary: #586e75;
+            --text-body: #657b83;
+            --border-color: rgba(101, 123, 131, 0.2);
+            --border-hover: rgba(101, 123, 131, 0.4);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #002b36;
-            color: #839496;
+            background: var(--bg-primary);
+            color: var(--text-body);
             padding: 0.5rem;
             font-size: 12px;
             height: 100vh;
             overflow: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .header {
             text-align: center;
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
         }
 
         .header h1 {
-            color: #fdf6e3;
+            color: var(--text-primary);
             font-size: 1.2rem;
             font-weight: 400;
-            margin-bottom: 0.2rem;
         }
 
-        .header p {
-            color: #93a1a1;
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--bg-secondary);
+            padding: 0.3rem 0.5rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mode-toggle:hover {
+            border-color: var(--border-hover);
+        }
+
+        .mode-toggle span {
+            font-size: 0.9rem;
+        }
+
+        .mode-label {
             font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .container {
@@ -46,24 +105,26 @@
 
         .column {
             flex: 1;
-            background: rgba(7, 54, 66, 0.4);
+            background: var(--bg-secondary);
             border-radius: 6px;
             padding: 0.5rem;
-            border: 1px solid rgba(131, 148, 150, 0.1);
+            border: 1px solid var(--border-color);
             overflow-y: auto;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .column-title {
-            color: #fdf6e3;
+            color: var(--text-primary);
             font-size: 0.8rem;
             font-weight: 500;
             margin-bottom: 0.5rem;
             text-align: center;
             position: sticky;
             top: 0;
-            background: rgba(7, 54, 66, 0.9);
+            background: var(--bg-secondary);
             padding: 0.3rem 0;
             border-radius: 4px;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .color-list {
@@ -73,16 +134,23 @@
         }
 
         .color-item {
-            background: rgba(0, 43, 54, 0.6);
+            background: var(--bg-tertiary);
             border-radius: 4px;
             padding: 0.4rem;
-            border: 1px solid rgba(131, 148, 150, 0.1);
+            border: 2px solid transparent;
             transition: all 0.2s ease;
+            outline: none;
         }
 
         .color-item:hover {
             transform: translateY(-1px);
-            border-color: rgba(131, 148, 150, 0.3);
+            border-color: var(--border-hover);
+        }
+
+        .color-item:focus,
+        .color-item.focused {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(38, 139, 210, 0.3);
         }
 
         .color-row {
@@ -108,38 +176,52 @@
         }
 
         .color-name {
-            color: #fdf6e3;
+            color: var(--text-primary);
             font-size: 0.75rem;
             font-weight: 500;
             min-width: 45px;
+            transition: color 0.3s ease;
         }
 
         .color-role {
-            color: #93a1a1;
+            color: var(--text-secondary);
             font-size: 0.65rem;
             line-height: 1.1;
             margin-bottom: 0.3rem;
             overflow: hidden;
             text-overflow: ellipsis;
+            transition: color 0.3s ease;
         }
 
-        .hex-code {
-            display: block;
-            background: rgba(7, 54, 66, 0.8);
-            color: #268bd2;
-            padding: 0.2rem 0.3rem;
+        .format-buttons {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .format-btn {
+            flex: 1;
+            background: var(--bg-input);
+            color: var(--accent);
+            padding: 0.25rem 0.2rem;
             border-radius: 3px;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             cursor: pointer;
             border: 1px solid rgba(38, 139, 210, 0.3);
             transition: all 0.2s ease;
             text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .hex-code:hover {
+        .format-btn:hover {
             background: rgba(38, 139, 210, 0.1);
             border-color: rgba(38, 139, 210, 0.5);
+        }
+
+        .format-btn:active {
+            transform: scale(0.95);
         }
 
         .toast {
@@ -161,7 +243,25 @@
             transform: translateX(0);
         }
 
-        /* Custom scrollbar for webkit browsers */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 0.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            transition: color 0.3s ease;
+        }
+
+        .keyboard-hint kbd {
+            background: var(--bg-secondary);
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            border: 1px solid var(--border-color);
+            margin: 0 0.1rem;
+        }
+
         .column::-webkit-scrollbar {
             width: 3px;
         }
@@ -179,181 +279,142 @@
         .column::-webkit-scrollbar-thumb:hover {
             background: rgba(131, 148, 150, 0.5);
         }
+
+        @media (max-width: 480px) {
+            .format-btn {
+                font-size: 0.55rem;
+                padding: 0.2rem 0.15rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Solarized Palette</h1>
-        <p>Tap swatch or hex to copy</p>
+        <div class="mode-toggle" onclick="toggleMode()" tabindex="0" role="button" aria-label="Toggle light/dark mode">
+            <span class="mode-icon">🌙</span>
+            <span class="mode-label">Dark</span>
+        </div>
     </div>
 
     <div class="container">
-        <div class="column">
+        <div class="column" id="base-column" data-column="0">
             <h2 class="column-title">Base Colors</h2>
-            <div class="color-list">
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #002b36;" onclick="copyToClipboard('#002b36')"></div>
-                        <div class="color-name">Base03</div>
-                    </div>
-                    <div class="color-role">Dark primary bg</div>
-                    <div class="hex-code" onclick="copyToClipboard('#002b36')">#002b36</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #073642;" onclick="copyToClipboard('#073642')"></div>
-                        <div class="color-name">Base02</div>
-                    </div>
-                    <div class="color-role">Dark secondary bg</div>
-                    <div class="hex-code" onclick="copyToClipboard('#073642')">#073642</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #586e75;" onclick="copyToClipboard('#586e75')"></div>
-                        <div class="color-name">Base01</div>
-                    </div>
-                    <div class="color-role">Dark secondary text</div>
-                    <div class="hex-code" onclick="copyToClipboard('#586e75')">#586e75</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #657b83;" onclick="copyToClipboard('#657b83')"></div>
-                        <div class="color-name">Base00</div>
-                    </div>
-                    <div class="color-role">Dark primary text</div>
-                    <div class="hex-code" onclick="copyToClipboard('#657b83')">#657b83</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #839496;" onclick="copyToClipboard('#839496')"></div>
-                        <div class="color-name">Base0</div>
-                    </div>
-                    <div class="color-role">Light primary text</div>
-                    <div class="hex-code" onclick="copyToClipboard('#839496')">#839496</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #93a1a1;" onclick="copyToClipboard('#93a1a1')"></div>
-                        <div class="color-name">Base1</div>
-                    </div>
-                    <div class="color-role">Light secondary text</div>
-                    <div class="hex-code" onclick="copyToClipboard('#93a1a1')">#93a1a1</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #eee8d5;" onclick="copyToClipboard('#eee8d5')"></div>
-                        <div class="color-name">Base2</div>
-                    </div>
-                    <div class="color-role">Light secondary bg</div>
-                    <div class="hex-code" onclick="copyToClipboard('#eee8d5')">#eee8d5</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #fdf6e3;" onclick="copyToClipboard('#fdf6e3')"></div>
-                        <div class="color-name">Base3</div>
-                    </div>
-                    <div class="color-role">Light primary bg</div>
-                    <div class="hex-code" onclick="copyToClipboard('#fdf6e3')">#fdf6e3</div>
-                </div>
-            </div>
+            <div class="color-list" id="base-colors"></div>
         </div>
 
-        <div class="column">
+        <div class="column" id="accent-column" data-column="1">
             <h2 class="column-title">Accent Colors</h2>
-            <div class="color-list">
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #b58900;" onclick="copyToClipboard('#b58900')"></div>
-                        <div class="color-name">Yellow</div>
-                    </div>
-                    <div class="color-role">Warnings, highlights</div>
-                    <div class="hex-code" onclick="copyToClipboard('#b58900')">#b58900</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #cb4b16;" onclick="copyToClipboard('#cb4b16')"></div>
-                        <div class="color-name">Orange</div>
-                    </div>
-                    <div class="color-role">Constants, tags</div>
-                    <div class="hex-code" onclick="copyToClipboard('#cb4b16')">#cb4b16</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #dc322f;" onclick="copyToClipboard('#dc322f')"></div>
-                        <div class="color-name">Red</div>
-                    </div>
-                    <div class="color-role">Errors, alerts</div>
-                    <div class="hex-code" onclick="copyToClipboard('#dc322f')">#dc322f</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #d33682;" onclick="copyToClipboard('#d33682')"></div>
-                        <div class="color-name">Magenta</div>
-                    </div>
-                    <div class="color-role">Keywords, operators</div>
-                    <div class="hex-code" onclick="copyToClipboard('#d33682')">#d33682</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #6c71c4;" onclick="copyToClipboard('#6c71c4')"></div>
-                        <div class="color-name">Violet</div>
-                    </div>
-                    <div class="color-role">Variables, headings</div>
-                    <div class="hex-code" onclick="copyToClipboard('#6c71c4')">#6c71c4</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #268bd2;" onclick="copyToClipboard('#268bd2')"></div>
-                        <div class="color-name">Blue</div>
-                    </div>
-                    <div class="color-role">Links, functions</div>
-                    <div class="hex-code" onclick="copyToClipboard('#268bd2')">#268bd2</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #2aa198;" onclick="copyToClipboard('#2aa198')"></div>
-                        <div class="color-name">Cyan</div>
-                    </div>
-                    <div class="color-role">Code blocks</div>
-                    <div class="hex-code" onclick="copyToClipboard('#2aa198')">#2aa198</div>
-                </div>
-
-                <div class="color-item">
-                    <div class="color-row">
-                        <div class="color-swatch" style="background-color: #859900;" onclick="copyToClipboard('#859900')"></div>
-                        <div class="color-name">Green</div>
-                    </div>
-                    <div class="color-role">Success, strings</div>
-                    <div class="hex-code" onclick="copyToClipboard('#859900')">#859900</div>
-                </div>
-            </div>
+            <div class="color-list" id="accent-colors"></div>
         </div>
+    </div>
+
+    <div class="keyboard-hint">
+        <kbd>↑</kbd><kbd>↓</kbd> navigate <kbd>←</kbd><kbd>→</kbd> columns <kbd>Enter</kbd> copy hex
     </div>
 
     <div class="toast" id="toast">Copied!</div>
 
     <script>
-        function copyToClipboard(hexCode) {
-            navigator.clipboard.writeText(hexCode).then(function() {
-                showToast();
-            }).catch(function(err) {
-                console.error('Failed to copy: ', err);
-                // Fallback for older browsers
+        const colors = {
+            base: [
+                { name: 'Base03', hex: '#002b36', role: 'Dark primary bg' },
+                { name: 'Base02', hex: '#073642', role: 'Dark secondary bg' },
+                { name: 'Base01', hex: '#586e75', role: 'Dark secondary text' },
+                { name: 'Base00', hex: '#657b83', role: 'Dark primary text' },
+                { name: 'Base0', hex: '#839496', role: 'Light primary text' },
+                { name: 'Base1', hex: '#93a1a1', role: 'Light secondary text' },
+                { name: 'Base2', hex: '#eee8d5', role: 'Light secondary bg' },
+                { name: 'Base3', hex: '#fdf6e3', role: 'Light primary bg' }
+            ],
+            accent: [
+                { name: 'Yellow', hex: '#b58900', role: 'Warnings, highlights' },
+                { name: 'Orange', hex: '#cb4b16', role: 'Constants, tags' },
+                { name: 'Red', hex: '#dc322f', role: 'Errors, alerts' },
+                { name: 'Magenta', hex: '#d33682', role: 'Keywords, operators' },
+                { name: 'Violet', hex: '#6c71c4', role: 'Variables, headings' },
+                { name: 'Blue', hex: '#268bd2', role: 'Links, functions' },
+                { name: 'Cyan', hex: '#2aa198', role: 'Code blocks' },
+                { name: 'Green', hex: '#859900', role: 'Success, strings' }
+            ]
+        };
+
+        let isDarkMode = true;
+        let focusedColumn = 0;
+        let focusedIndex = 0;
+
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function hexToHsl(hex) {
+            let r = parseInt(hex.slice(1, 3), 16) / 255;
+            let g = parseInt(hex.slice(3, 5), 16) / 255;
+            let b = parseInt(hex.slice(5, 7), 16) / 255;
+
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+
+            return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+        }
+
+        function createColorItem(color, index, column) {
+            const rgb = hexToRgb(color.hex);
+            const hsl = hexToHsl(color.hex);
+            
+            return `
+                <div class="color-item" tabindex="-1" data-index="${index}" data-column="${column}" data-hex="${color.hex}">
+                    <div class="color-row">
+                        <div class="color-swatch" style="background-color: ${color.hex};" onclick="copyToClipboard('${color.hex}')"></div>
+                        <div class="color-name">${color.name}</div>
+                    </div>
+                    <div class="color-role">${color.role}</div>
+                    <div class="format-buttons">
+                        <button class="format-btn" onclick="copyToClipboard('${color.hex}')">${color.hex}</button>
+                        <button class="format-btn" onclick="copyToClipboard('${rgb}')">${rgb}</button>
+                        <button class="format-btn" onclick="copyToClipboard('${hsl}')">${hsl}</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderColors() {
+            document.getElementById('base-colors').innerHTML = 
+                colors.base.map((c, i) => createColorItem(c, i, 0)).join('');
+            document.getElementById('accent-colors').innerHTML = 
+                colors.accent.map((c, i) => createColorItem(c, i, 1)).join('');
+        }
+
+        function toggleMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('light-mode', !isDarkMode);
+            
+            const toggle = document.querySelector('.mode-toggle');
+            toggle.querySelector('.mode-icon').textContent = isDarkMode ? '🌙' : '☀️';
+            toggle.querySelector('.mode-label').textContent = isDarkMode ? 'Dark' : 'Light';
+            
+            document.querySelector('meta[name="theme-color"]').content = isDarkMode ? '#002b36' : '#fdf6e3';
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(showToast).catch(() => {
                 const textArea = document.createElement('textarea');
-                textArea.value = hexCode;
+                textArea.value = text;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
@@ -365,9 +426,79 @@
         function showToast() {
             const toast = document.getElementById('toast');
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 1200);
+            setTimeout(() => toast.classList.remove('show'), 1200);
+        }
+
+        function updateFocus() {
+            document.querySelectorAll('.color-item').forEach(el => el.classList.remove('focused'));
+            const items = document.querySelectorAll(`[data-column="${focusedColumn}"] .color-item`);
+            if (items[focusedIndex]) {
+                items[focusedIndex].classList.add('focused');
+                items[focusedIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        }
+
+        function getColumnLength(col) {
+            return col === 0 ? colors.base.length : colors.accent.length;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const maxIndex = getColumnLength(focusedColumn) - 1;
+            
+            switch (e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    focusedIndex = Math.max(0, focusedIndex - 1);
+                    updateFocus();
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    focusedIndex = Math.min(maxIndex, focusedIndex + 1);
+                    updateFocus();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    focusedColumn = 0;
+                    focusedIndex = Math.min(focusedIndex, getColumnLength(0) - 1);
+                    updateFocus();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    focusedColumn = 1;
+                    focusedIndex = Math.min(focusedIndex, getColumnLength(1) - 1);
+                    updateFocus();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    const focused = document.querySelector('.color-item.focused');
+                    if (focused) {
+                        copyToClipboard(focused.dataset.hex);
+                    }
+                    break;
+                case 't':
+                case 'T':
+                    if (!e.metaKey && !e.ctrlKey) {
+                        toggleMode();
+                    }
+                    break;
+            }
+        });
+
+        // Handle mode toggle keyboard activation
+        document.querySelector('.mode-toggle').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleMode();
+            }
+        });
+
+        // Initialize
+        renderColors();
+        updateFocus();
+
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('solarized-sw.js').catch(() => {});
         }
     </script>
 </body>
