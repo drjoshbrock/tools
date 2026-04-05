@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Morning Dashboard</title>
+    <meta name="description" content="Morning dashboard with weather and Reds updates">
+    <meta name="theme-color" content="#002b36" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fdf6e3" media="(prefers-color-scheme: light)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dashboard">
+    <link rel="manifest" href="dashboard-manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23002b36' width='100' height='100' rx='20'/><text x='50' y='62' text-anchor='middle' font-size='40' fill='%2393a1a1'>></text><text x='62' y='62' text-anchor='middle' font-size='40' fill='%23859900'>_</text></svg>">
+    <style>
+        /* ── Solarized Palette ── */
+        :root {
+            /* Dark mode (default) */
+            --base03:  #002b36;
+            --base02:  #073642;
+            --base01:  #586e75;
+            --base00:  #657b83;
+            --base0:   #839496;
+            --base1:   #93a1a1;
+            --base2:   #eee8d5;
+            --base3:   #fdf6e3;
+            --yellow:  #b58900;
+            --orange:  #cb4b16;
+            --red:     #dc322f;
+            --magenta: #d33682;
+            --violet:  #6c71c4;
+            --blue:    #268bd2;
+            --cyan:    #2aa198;
+            --green:   #859900;
+
+            --bg:        var(--base03);
+            --bg-alt:    var(--base02);
+            --fg:        var(--base0);
+            --fg-dim:    var(--base01);
+            --fg-bright: var(--base1);
+            --accent:    var(--cyan);
+            --border:    var(--base01);
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg:        var(--base3);
+                --bg-alt:    var(--base2);
+                --fg:        var(--base00);
+                --fg-dim:    var(--base1);
+                --fg-bright: var(--base01);
+                --accent:    var(--cyan);
+                --border:    var(--base1);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 1rem;
+            font-size: 13px;
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .dashboard {
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* ── Header ── */
+        .header {
+            color: var(--fg-bright);
+            margin-bottom: 1rem;
+            white-space: pre;
+        }
+        .header .title {
+            color: var(--green);
+            font-weight: bold;
+        }
+        .header .date {
+            color: var(--yellow);
+        }
+        .header .prompt {
+            color: var(--accent);
+        }
+        .header .time {
+            color: var(--fg-dim);
+        }
+
+        /* ── Panel Boxes ── */
+        .panel {
+            margin-bottom: 1rem;
+            color: var(--fg);
+        }
+        .panel-border {
+            color: var(--border);
+        }
+        .panel-title {
+            color: var(--blue);
+            font-weight: bold;
+        }
+        .panel-subtitle {
+            color: var(--fg-dim);
+        }
+        .panel-body {
+            padding: 0;
+        }
+        .panel-line {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* ── Weather specifics ── */
+        .temp-high { color: var(--orange); font-weight: bold; }
+        .temp-low { color: var(--blue); font-weight: bold; }
+        .condition { color: var(--yellow); }
+        .rain-value { color: var(--cyan); }
+        .rain-bar { color: var(--cyan); }
+        .rain-bar-low { color: var(--green); }
+        .rain-bar-med { color: var(--yellow); }
+        .rain-bar-high { color: var(--orange); }
+        .rain-bar-extreme { color: var(--red); }
+        .rain-label { color: var(--fg-dim); font-size: 11px; }
+
+        /* ── Baseball specifics ── */
+        .team-cin { color: var(--red); font-weight: bold; }
+        .team-opp { color: var(--fg-bright); font-weight: bold; }
+        .win { color: var(--green); font-weight: bold; }
+        .loss { color: var(--red); font-weight: bold; }
+        .score-box { color: var(--fg); }
+        .pitcher-name { color: var(--violet); }
+        .game-time { color: var(--yellow); }
+        .venue { color: var(--fg-dim); }
+        .favored { color: var(--green); }
+
+        /* ── Inning-by-inning table ── */
+        .linescore {
+            font-size: 11px;
+            margin: 0.5rem 0;
+            overflow-x: auto;
+        }
+        .linescore table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .linescore th, .linescore td {
+            padding: 1px 5px;
+            text-align: center;
+            color: var(--fg);
+        }
+        .linescore th {
+            color: var(--fg-dim);
+            border-bottom: 1px solid var(--border);
+        }
+        .linescore .team-col {
+            text-align: left;
+            font-weight: bold;
+            padding-right: 10px;
+        }
+        .linescore .total-col {
+            font-weight: bold;
+            border-left: 1px solid var(--border);
+            padding: 1px 6px;
+        }
+        .linescore .reds-row .team-col { color: var(--red); }
+
+        /* ── Loading / Error ── */
+        .loading {
+            color: var(--fg-dim);
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .error-msg { color: var(--red); }
+        .none-msg { color: var(--fg-dim); }
+
+        /* ── Refresh button ── */
+        .refresh-row {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        .refresh-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            font-family: inherit;
+            font-size: 12px;
+            padding: 4px 16px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .refresh-btn:active {
+            background: var(--bg-alt);
+        }
+
+        /* ── Separator ── */
+        .sep {
+            color: var(--border);
+            white-space: pre;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header" id="header"></div>
+        <div id="weather-panel"></div>
+        <div id="reds-panel"></div>
+        <div class="refresh-row">
+            <button class="refresh-btn" onclick="loadAll()">[  refresh  ]</button>
+        </div>
+    </div>
+
+    <script>
+    // ════════════════════════════════════════
+    //  CONFIG
+    // ════════════════════════════════════════
+    const LAT = 38.40;
+    const LON = -85.61;
+    const LOCATION_NAME = 'Prospect, KY';
+    const REDS_TEAM_ID = 113;
+    const TZ = 'America/New_York';
+
+    // ════════════════════════════════════════
+    //  UTILITIES
+    // ════════════════════════════════════════
+    function esc(s) {
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    function todayStr() {
+        return new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+    }
+    function yesterdayStr() {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d.toLocaleDateString('en-CA', { timeZone: TZ });
+    }
+    function formatDate() {
+        return new Date().toLocaleDateString('en-US', {
+            timeZone: TZ, weekday: 'long', year: 'numeric',
+            month: 'long', day: 'numeric'
+        });
+    }
+    function formatTime() {
+        return new Date().toLocaleTimeString('en-US', {
+            timeZone: TZ, hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+    }
+
+    function boxTop(title, subtitle) {
+        const t = subtitle
+            ? `<span class="panel-title"> ${esc(title)} </span><span class="panel-subtitle">~ ${esc(subtitle)} </span>`
+            : `<span class="panel-title"> ${esc(title)} </span>`;
+        return `<span class="panel-border">+-</span>${t}<span class="panel-border">${'-'.repeat(60)}</span>`;
+    }
+    function boxLine(content) {
+        return `<span class="panel-border">|</span> ${content}`;
+    }
+    function boxBottom() {
+        return `<span class="panel-border">+${'-'.repeat(62)}</span>`;
+    }
+
+    // ════════════════════════════════════════
+    //  HEADER
+    // ════════════════════════════════════════
+    function renderHeader() {
+        document.getElementById('header').innerHTML =
+            `<span class="prompt">$</span> <span class="title">morning-dashboard</span> <span class="time">--loaded ${formatTime()}</span>\n` +
+            `<span class="date">  ${formatDate()}</span>`;
+    }
+
+    // ════════════════════════════════════════
+    //  WEATHER (Open-Meteo)
+    // ════════════════════════════════════════
+    const WMO_CODES = {
+        0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+        45: 'Foggy', 48: 'Rime fog', 51: 'Light drizzle', 53: 'Moderate drizzle',
+        55: 'Dense drizzle', 56: 'Freezing drizzle', 57: 'Heavy freezing drizzle',
+        61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
+        66: 'Light freezing rain', 67: 'Heavy freezing rain',
+        71: 'Slight snow', 73: 'Moderate snow', 75: 'Heavy snow',
+        77: 'Snow grains', 80: 'Slight showers', 81: 'Moderate showers',
+        82: 'Violent showers', 85: 'Slight snow showers', 86: 'Heavy snow showers',
+        95: 'Thunderstorm', 96: 'Thunderstorm + slight hail', 99: 'Thunderstorm + heavy hail'
+    };
+    const WMO_ICONS = {
+        0: '(*)', 1: '(.)', 2: '(~)', 3: '[=]',
+        45: '~~~', 48: '~~~', 51: '.:.', 53: '.::', 55: ':::', 56: '*:.', 57: '*::',
+        61: '.|.', 63: '.|:', 65: ':|:', 66: '*|.', 67: '*|:',
+        71: '*.* ', 73: '***', 75: '***', 77: '...',
+        80: '.|.', 81: ':|:', 82: ':|:', 85: '*.*', 86: '***',
+        95: '/!\\', 96: '/!\\', 99: '/!\\'
+    };
+
+    function rainBar(pct) {
+        const blocks = ' ▁▂▃▄▅▆▇█';
+        const idx = Math.min(8, Math.round(pct / 100 * 8));
+        const bar = blocks[idx];
+        let cls = 'rain-bar-low';
+        if (pct > 60) cls = 'rain-bar-extreme';
+        else if (pct > 40) cls = 'rain-bar-high';
+        else if (pct > 20) cls = 'rain-bar-med';
+        return `<span class="${cls}">${bar}</span>`;
+    }
+
+    async function loadWeather() {
+        const el = document.getElementById('weather-panel');
+        const lines = [boxTop('WEATHER', LOCATION_NAME)];
+        lines.push(boxLine('<span class="loading">fetching forecast...</span>'));
+        lines.push(boxBottom());
+        el.innerHTML = lines.map(l => `<div class="panel-line">${l}</div>`).join('');
+
+        try {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`
+                + `&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode`
+                + `&hourly=precipitation_probability`
+                + `&temperature_unit=fahrenheit&timezone=${TZ}&forecast_days=1`;
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+
+            const high = Math.round(data.daily.temperature_2m_max[0]);
+            const low = Math.round(data.daily.temperature_2m_min[0]);
+            const code = data.daily.weathercode[0];
+            const rainMax = data.daily.precipitation_probability_max[0];
+            const condition = WMO_CODES[code] || 'Unknown';
+            const icon = WMO_ICONS[code] || '???';
+            const hourlyRain = data.hourly.precipitation_probability.slice(0, 24);
+
+            const out = [boxTop('WEATHER', LOCATION_NAME)];
+            out.push(boxLine(''));
+            out.push(boxLine(`  <span class="condition">${esc(icon)}  ${esc(condition)}</span>`));
+            out.push(boxLine(''));
+            out.push(boxLine(`  High: <span class="temp-high">${high}°F</span>    Low: <span class="temp-low">${low}°F</span>`));
+            out.push(boxLine(`  Rain: <span class="rain-value">${rainMax}%</span> chance`));
+            out.push(boxLine(''));
+
+            // Hourly rain chart
+            out.push(boxLine(`  <span class="rain-label">Rain % by hour:</span>`));
+            let chartLine = '  ';
+            for (let i = 0; i < 24; i++) {
+                chartLine += rainBar(hourlyRain[i]);
+            }
+            out.push(boxLine(chartLine));
+
+            // Time labels
+            let labelLine = '  ';
+            for (let i = 0; i < 24; i++) {
+                if (i % 6 === 0) {
+                    const h = i === 0 ? '12a' : i < 12 ? (i + 'a') : i === 12 ? '12p' : ((i-12) + 'p');
+                    labelLine += `<span class="rain-label">${h}</span>`;
+                    // pad to account for characters
+                    const padNeeded = 1; // each bar is 1 char wide
+                } else {
+                    labelLine += ' ';
+                }
+            }
+            // Simpler approach: label at fixed positions
+            out.push(boxLine(`  <span class="rain-label">12a   6a    12p   6p   </span>`));
+
+            out.push(boxLine(''));
+            out.push(boxBottom());
+            el.innerHTML = out.map(l => `<div class="panel-line">${l}</div>`).join('');
+        } catch (err) {
+            const out = [boxTop('WEATHER', LOCATION_NAME)];
+            out.push(boxLine(`<span class="error-msg">  error: ${esc(err.message)}</span>`));
+            out.push(boxBottom());
+            el.innerHTML = out.map(l => `<div class="panel-line">${l}</div>`).join('');
+        }
+    }
+
+    // ════════════════════════════════════════
+    //  REDS (MLB Stats API)
+    // ════════════════════════════════════════
+    async function fetchMLB(dateStr) {
+        const url = `https://statsapi.mlb.com/api/v1/schedule?teamId=${REDS_TEAM_ID}`
+            + `&date=${dateStr}&sportId=1`
+            + `&hydrate=probablePitcher,linescore,decisions,team`;
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        return resp.json();
+    }
+
+    function formatGameTime(isoStr) {
+        const d = new Date(isoStr);
+        return d.toLocaleTimeString('en-US', {
+            timeZone: TZ, hour: 'numeric', minute: '2-digit'
+        }) + ' ET';
+    }
+
+    function isRedsHome(game) {
+        return game.teams.home.team.id === REDS_TEAM_ID;
+    }
+
+    function getRedsTeam(game) {
+        return isRedsHome(game) ? game.teams.home : game.teams.away;
+    }
+    function getOppTeam(game) {
+        return isRedsHome(game) ? game.teams.away : game.teams.home;
+    }
+
+    function abbrev(teamName) {
+        // Common abbreviations
+        const map = {
+            'Cincinnati Reds': 'CIN', 'St. Louis Cardinals': 'STL',
+            'Chicago Cubs': 'CHC', 'Milwaukee Brewers': 'MIL',
+            'Pittsburgh Pirates': 'PIT', 'Atlanta Braves': 'ATL',
+            'New York Mets': 'NYM', 'Philadelphia Phillies': 'PHI',
+            'Washington Nationals': 'WSH', 'Miami Marlins': 'MIA',
+            'Los Angeles Dodgers': 'LAD', 'San Francisco Giants': 'SF',
+            'San Diego Padres': 'SD', 'Arizona Diamondbacks': 'ARI',
+            'Colorado Rockies': 'COL', 'New York Yankees': 'NYY',
+            'Boston Red Sox': 'BOS', 'Tampa Bay Rays': 'TB',
+            'Toronto Blue Jays': 'TOR', 'Baltimore Orioles': 'BAL',
+            'Minnesota Twins': 'MIN', 'Cleveland Guardians': 'CLE',
+            'Chicago White Sox': 'CWS', 'Detroit Tigers': 'DET',
+            'Kansas City Royals': 'KC', 'Houston Astros': 'HOU',
+            'Texas Rangers': 'TEX', 'Seattle Mariners': 'SEA',
+            'Los Angeles Angels': 'LAA', 'Oakland Athletics': 'OAK',
+        };
+        return map[teamName] || teamName.substring(0, 3).toUpperCase();
+    }
+
+    function renderLinescore(game) {
+        const ls = game.linescore;
+        if (!ls || !ls.innings || ls.innings.length === 0) return '';
+
+        const innings = ls.innings;
+        const away = getOppTeam(game) === game.teams.away
+            ? { name: abbrev(game.teams.away.team.name), runs: [] }
+            : { name: abbrev(game.teams.home.team.name), runs: [] };
+        const home = getOppTeam(game) === game.teams.away
+            ? { name: abbrev(game.teams.home.team.name), runs: [] }
+            : { name: abbrev(game.teams.away.team.name), runs: [] };
+
+        // Actually let's just use away/home directly
+        const awayName = abbrev(game.teams.away.team.name);
+        const homeName = abbrev(game.teams.home.team.name);
+        const awayRuns = innings.map(i => i.away?.runs ?? '-');
+        const homeRuns = innings.map(i => i.home?.runs ?? '-');
+        const awayR = ls.teams?.away?.runs ?? '?';
+        const awayH = ls.teams?.away?.hits ?? '?';
+        const awayE = ls.teams?.away?.errors ?? '?';
+        const homeR = ls.teams?.home?.runs ?? '?';
+        const homeH = ls.teams?.home?.hits ?? '?';
+        const homeE = ls.teams?.home?.errors ?? '?';
+
+        const isRedsAway = game.teams.away.team.id === REDS_TEAM_ID;
+
+        let html = '<div class="linescore"><table>';
+        // Header row
+        html += '<tr><th class="team-col"></th>';
+        for (let i = 0; i < innings.length; i++) {
+            html += `<th>${i + 1}</th>`;
+        }
+        html += '<th class="total-col">R</th><th class="total-col">H</th><th class="total-col">E</th></tr>';
+
+        // Away row
+        const awayClass = !isRedsAway ? '' : ' reds-row';
+        html += `<tr class="${awayClass}"><td class="team-col">${esc(awayName)}</td>`;
+        awayRuns.forEach(r => { html += `<td>${r}</td>`; });
+        html += `<td class="total-col">${awayR}</td><td class="total-col">${awayH}</td><td class="total-col">${awayE}</td></tr>`;
+
+        // Home row
+        const homeClass = isRedsAway ? '' : ' reds-row';
+        html += `<tr class="${homeClass}"><td class="team-col">${esc(homeName)}</td>`;
+        homeRuns.forEach(r => { html += `<td>${r}</td>`; });
+        html += `<td class="total-col">${homeR}</td><td class="total-col">${homeH}</td><td class="total-col">${homeE}</td></tr>`;
+
+        html += '</table></div>';
+        return html;
+    }
+
+    function renderAsciiDiamond(game) {
+        // Minimal ASCII diamond as a visual flair
+        const redsTeam = getRedsTeam(game);
+        const oppTeam = getOppTeam(game);
+        const redsScore = redsTeam.score ?? 0;
+        const oppScore = oppTeam.score ?? 0;
+        const won = redsScore > oppScore;
+        const resultClass = won ? 'win' : 'loss';
+        const resultText = won ? 'W' : 'L';
+
+        return `  <span class="${resultClass}">[${resultText}]</span> <span class="team-cin">CIN ${redsScore}</span>, <span class="team-opp">${esc(abbrev(oppTeam.team.name))} ${oppScore}</span>`;
+    }
+
+    async function loadReds() {
+        const el = document.getElementById('reds-panel');
+        const lines = [boxTop('REDS', 'Cincinnati')];
+        lines.push(boxLine('<span class="loading">checking schedule...</span>'));
+        lines.push(boxBottom());
+        el.innerHTML = lines.map(l => `<div class="panel-line">${l}</div>`).join('');
+
+        try {
+            const [yesterdayData, todayData] = await Promise.all([
+                fetchMLB(yesterdayStr()),
+                fetchMLB(todayStr())
+            ]);
+
+            const out = [boxTop('REDS', 'Cincinnati')];
+            out.push(boxLine(''));
+
+            // ── Yesterday's game ──
+            const yGames = yesterdayData.dates?.[0]?.games || [];
+            if (yGames.length > 0) {
+                const yg = yGames[0];
+                const status = yg.status?.detailedState || '';
+                if (status === 'Final' || status === 'Game Over' || status.startsWith('Final')) {
+                    out.push(boxLine(`  <span class="panel-subtitle">-- Yesterday's Result --</span>`));
+                    out.push(boxLine(''));
+                    out.push(boxLine(renderAsciiDiamond(yg)));
+                    out.push(boxLine(''));
+
+                    // Linescore
+                    const lsHtml = renderLinescore(yg);
+                    if (lsHtml) {
+                        out.push(boxLine(lsHtml));
+                    }
+
+                    // Decisions
+                    const dec = yg.decisions;
+                    if (dec) {
+                        const wp = dec.winner;
+                        const lp = dec.loser;
+                        const sv = dec.save;
+                        let decLine = '  ';
+                        if (wp) decLine += `W: <span class="pitcher-name">${esc(wp.fullName)}</span>  `;
+                        if (lp) decLine += `L: <span class="pitcher-name">${esc(lp.fullName)}</span>  `;
+                        if (sv) decLine += `S: <span class="pitcher-name">${esc(sv.fullName)}</span>`;
+                        out.push(boxLine(decLine));
+                    }
+
+                    // Venue
+                    const venue = yg.venue?.name;
+                    if (venue) {
+                        const homeAway = isRedsHome(yg) ? 'Home' : 'Away';
+                        out.push(boxLine(`  <span class="venue">${esc(venue)} (${homeAway})</span>`));
+                    }
+                } else {
+                    out.push(boxLine(`  <span class="panel-subtitle">-- Yesterday --</span>`));
+                    out.push(boxLine(`  <span class="none-msg">${esc(status || 'No result available')}</span>`));
+                }
+            } else {
+                out.push(boxLine(`  <span class="panel-subtitle">-- Yesterday --</span>`));
+                out.push(boxLine(`  <span class="none-msg">No game</span>`));
+            }
+
+            out.push(boxLine(''));
+
+            // ── Today's game ──
+            const tGames = todayData.dates?.[0]?.games || [];
+            if (tGames.length > 0) {
+                const tg = tGames[0];
+                const status = tg.status?.detailedState || '';
+                out.push(boxLine(`  <span class="panel-subtitle">-- Today's Game --</span>`));
+                out.push(boxLine(''));
+
+                if (status === 'Final' || status === 'Game Over' || status.startsWith('Final')) {
+                    // Game already played today
+                    out.push(boxLine(renderAsciiDiamond(tg)));
+                    const lsHtml = renderLinescore(tg);
+                    if (lsHtml) out.push(boxLine(lsHtml));
+                } else if (status === 'In Progress' || status === 'Warmup') {
+                    out.push(boxLine(`  <span class="game-time">LIVE - ${esc(status)}</span>`));
+                    const redsT = getRedsTeam(tg);
+                    const oppT = getOppTeam(tg);
+                    out.push(boxLine(`  <span class="team-cin">CIN ${redsT.score ?? 0}</span> - <span class="team-opp">${esc(abbrev(oppT.team.name))} ${oppT.score ?? 0}</span>`));
+                } else {
+                    // Scheduled
+                    const oppT = getOppTeam(tg);
+                    const homeAway = isRedsHome(tg) ? 'vs' : '@';
+                    const time = formatGameTime(tg.gameDate);
+
+                    out.push(boxLine(`  <span class="team-cin">CIN</span> ${homeAway} <span class="team-opp">${esc(abbrev(oppT.team.name))}</span>  <span class="game-time">${esc(time)}</span>`));
+
+                    // Venue
+                    const venue = tg.venue?.name;
+                    if (venue) {
+                        out.push(boxLine(`  <span class="venue">${esc(venue)}</span>`));
+                    }
+                    out.push(boxLine(''));
+
+                    // Probable pitchers
+                    const awayPitcher = tg.teams.away.probablePitcher;
+                    const homePitcher = tg.teams.home.probablePitcher;
+                    const redsPitcher = isRedsHome(tg) ? homePitcher : awayPitcher;
+                    const oppPitcher = isRedsHome(tg) ? awayPitcher : homePitcher;
+
+                    out.push(boxLine(`  Pitching matchup:`));
+                    if (redsPitcher) {
+                        out.push(boxLine(`    CIN: <span class="pitcher-name">${esc(redsPitcher.fullName)}</span>`));
+                    } else {
+                        out.push(boxLine(`    CIN: <span class="none-msg">TBD</span>`));
+                    }
+                    if (oppPitcher) {
+                        out.push(boxLine(`    ${esc(abbrev(oppT.team.name))}: <span class="pitcher-name">${esc(oppPitcher.fullName)}</span>`));
+                    } else {
+                        out.push(boxLine(`    ${esc(abbrev(oppT.team.name))}: <span class="none-msg">TBD</span>`));
+                    }
+                }
+            } else {
+                out.push(boxLine(`  <span class="panel-subtitle">-- Today --</span>`));
+                out.push(boxLine(`  <span class="none-msg">No game scheduled</span>`));
+            }
+
+            out.push(boxLine(''));
+            out.push(boxBottom());
+            el.innerHTML = out.map(l => `<div class="panel-line">${l}</div>`).join('');
+        } catch (err) {
+            const out = [boxTop('REDS', 'Cincinnati')];
+            out.push(boxLine(`<span class="error-msg">  error: ${esc(err.message)}</span>`));
+            out.push(boxBottom());
+            el.innerHTML = out.map(l => `<div class="panel-line">${l}</div>`).join('');
+        }
+    }
+
+    // ════════════════════════════════════════
+    //  INIT
+    // ════════════════════════════════════════
+    function loadAll() {
+        renderHeader();
+        loadWeather();
+        loadReds();
+    }
+
+    loadAll();
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('dashboard-sw.js').catch(() => {});
+    }
+    </script>
+</body>
+</html>
