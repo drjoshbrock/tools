@@ -91,6 +91,16 @@
         @keyframes blink{50%{opacity:0}}
         .error{color:var(--red)}
         .none{color:var(--fg-dim);font-style:italic}
+        .cal-event{border-left:3px solid var(--cyan);padding:4px 0 4px 10px;margin-bottom:8px}
+        .cal-event:last-child{margin-bottom:0}
+        .cal-time{color:var(--yellow);font-size:13px;font-weight:bold}
+        .cal-title{color:var(--fg-em);font-size:14px}
+        .cal-loc{color:var(--fg-dim);font-size:12px}
+        .cal-allday{border-left-color:var(--violet)}
+        .cal-now{border-left-color:var(--green);background:var(--bg-hl);margin-left:-10px;padding-left:20px;margin-right:-10px;padding-right:10px}
+        .cal-past .cal-time,.cal-past .cal-title{opacity:0.5}
+        .cal-setup{font-size:12px;line-height:1.8}
+        .cal-setup code{background:var(--bg-hl);padding:2px 4px;font-size:11px}
         .hidden{display:none}
     </style>
 </head>
@@ -103,6 +113,10 @@
         <div class="section">
             <div class="section-head"><span>WEATHER</span><span class="sub">Prospect, KY</span></div>
             <div class="section-body" id="weather-body"><span class="loading">loading...</span></div>
+        </div>
+        <div class="section hidden" id="calendar-section">
+            <div class="section-head"><span>SCHEDULE</span><span class="sub">Today</span></div>
+            <div class="section-body" id="calendar-body"></div>
         </div>
         <div class="section hidden" id="reds-section">
             <div class="section-head"><span>REDS</span><span class="sub">Cincinnati</span></div>
@@ -176,7 +190,7 @@
             let bars='';
             for(let i=6;i<=23;i++) bars+=rainBlock(hourly[i]);
             el.innerHTML=`
-                <a class="wx-link" href="carrot://forecast?location=40059" onclick="window.location.href='carrot://forecast?location=40059';return false;">
+                <a class="wx-link" href="carrotweather://" onclick="window.location.href='carrotweather://';return false;">
                     <div class="wx-hero">
                         <span class="wx-icon">${icon}</span>
                         <div class="wx-info">
@@ -423,10 +437,139 @@
         }
     }
 
+    /* ═══ CALENDAR (iCal / .ics feeds) ═══ */
+    // Add your iCloud and Outlook public calendar .ics URLs here
+    const CAL_FEEDS = [
+        // { name: 'iCloud', url: 'https://p123-caldav.icloud.com/published/2/YOUR_ID', color: 'var(--cyan)' },
+        // { name: 'Outlook', url: 'https://outlook.office365.com/owa/calendar/YOUR_ID/reachcalendar.ics', color: 'var(--blue)' },
+    ];
+
+    function parseICS(text) {
+        const events = [];
+        const blocks = text.split('BEGIN:VEVENT');
+        for (let i = 1; i < blocks.length; i++) {
+            const b = blocks[i].split('END:VEVENT')[0];
+            const get = (key) => {
+                // Handle folded lines (RFC 5545: continuation lines start with space/tab)
+                const unfolded = b.replace(/\r?\n[ \t]/g, '');
+                const m = unfolded.match(new RegExp('^' + key + '[;:](.*)$', 'm'));
+                return m ? m[1] : null;
+            };
+            const parseDate = (val) => {
+                if (!val) return null;
+                // Strip TZID parameter prefix if present
+                const v = val.replace(/^.*:/, '');
+                if (v.length === 8) return { date: new Date(v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8)), allDay: true };
+                // Parse YYYYMMDDTHHMMSSZ or YYYYMMDDTHHMMSS
+                const y=v.slice(0,4),mo=v.slice(4,6),d=v.slice(6,8),h=v.slice(9,11),mi=v.slice(11,13),s=v.slice(13,15);
+                const isUTC = v.endsWith('Z');
+                const dt = isUTC ? new Date(Date.UTC(+y,+mo-1,+d,+h,+mi,+s)) : new Date(+y,+mo-1,+d,+h,+mi,+s);
+                return { date: dt, allDay: false };
+            };
+            const summary = (get('SUMMARY') || '').replace(/\\,/g, ',').replace(/\\n/g, ' ').replace(/\\;/g, ';');
+            const location = (get('LOCATION') || '').replace(/\\,/g, ',').replace(/\\n/g, ' ').replace(/\\;/g, ';');
+            const start = parseDate(get('DTSTART'));
+            const end = parseDate(get('DTEND'));
+            if (summary && start) events.push({ summary, location, start: start.date, end: end?.date, allDay: start.allDay });
+        }
+        return events;
+    }
+
+    function isToday(date) {
+        const now = new Date();
+        const d = new Date(date);
+        return d.toLocaleDateString('en-CA', { timeZone: TZ }) === now.toLocaleDateString('en-CA', { timeZone: TZ });
+    }
+
+    function isNow(start, end) {
+        const now = Date.now();
+        return start.getTime() <= now && end && end.getTime() > now;
+    }
+
+    function isPast(end) {
+        return end && end.getTime() < Date.now();
+    }
+
+    async function loadCalendar() {
+        const sec = document.getElementById('calendar-section');
+        const el = document.getElementById('calendar-body');
+
+        if (CAL_FEEDS.length === 0) {
+            sec.classList.remove('hidden');
+            el.innerHTML = `<div class="cal-setup">
+                <span class="none">No calendar feeds configured.</span><br><br>
+                To add calendars, edit the <code>CAL_FEEDS</code> array in dashboard.html with your .ics URLs:<br><br>
+                <strong>iCloud:</strong> Calendar app → tap calendar name → Share Calendar → Public Calendar → copy URL<br><br>
+                <strong>Outlook:</strong> outlook.com → Settings → Calendar → Shared calendars → Publish → copy ICS link
+            </div>`;
+            return;
+        }
+
+        try {
+            const allEvents = [];
+            const results = await Promise.allSettled(
+                CAL_FEEDS.map(f => fetch(f.url).then(r => r.text()).then(t => ({ feed: f, events: parseICS(t) })))
+            );
+            for (const r of results) {
+                if (r.status === 'fulfilled') {
+                    for (const ev of r.value.events) {
+                        ev.color = r.value.feed.color;
+                        ev.calName = r.value.feed.name;
+                        allEvents.push(ev);
+                    }
+                }
+            }
+            // Filter to today's events
+            const todayEvents = allEvents.filter(ev => isToday(ev.start));
+            todayEvents.sort((a, b) => {
+                if (a.allDay && !b.allDay) return -1;
+                if (!a.allDay && b.allDay) return 1;
+                return a.start.getTime() - b.start.getTime();
+            });
+
+            if (todayEvents.length === 0) {
+                sec.classList.remove('hidden');
+                el.innerHTML = '<span class="none">No events today</span>';
+                return;
+            }
+
+            sec.classList.remove('hidden');
+            let html = '';
+            for (const ev of todayEvents) {
+                const now = ev.end && !ev.allDay ? isNow(ev.start, ev.end) : false;
+                const past = !ev.allDay && isPast(ev.end);
+                let cls = 'cal-event';
+                if (ev.allDay) cls += ' cal-allday';
+                if (now) cls += ' cal-now';
+                if (past) cls += ' cal-past';
+
+                let timeStr;
+                if (ev.allDay) {
+                    timeStr = 'ALL DAY';
+                } else {
+                    const startT = ev.start.toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' });
+                    const endT = ev.end ? ev.end.toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' }) : '';
+                    timeStr = endT ? `${startT} – ${endT}` : startT;
+                }
+
+                html += `<div class="${cls}" style="border-left-color:${ev.color || 'var(--cyan)'}">
+                    <div class="cal-time">${now ? '▸ ' : ''}${esc(timeStr)}</div>
+                    <div class="cal-title">${esc(ev.summary)}</div>
+                    ${ev.location ? `<div class="cal-loc">${esc(ev.location)}</div>` : ''}
+                </div>`;
+            }
+            el.innerHTML = html;
+        } catch (e) {
+            sec.classList.remove('hidden');
+            el.innerHTML = `<span class="error">✗ ${esc(e.message)}</span>`;
+        }
+    }
+
     /* ═══ INIT ═══ */
     function loadAll(){
         renderHeader();
         loadWeather();
+        loadCalendar();
         loadReds();
         loadESPNDaily('basketball','nba',ESPN.LAKERS,'LAL','team-lal','lakers-section','lakers-body');
         loadESPNWeekly('football','nfl',ESPN.DOLPHINS,'MIA','team-mia','dolphins-section','dolphins-body');
