@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  Morning Dashboard — Shortcut Quick Look Preview
+  This file shows what the assembled HTML output looks like
+  with sample data filled in. Use this as a visual reference.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morning Dashboard</title>
+    <style>
+        :root {
+            --base03:  #002b36; --base02:  #073642;
+            --base01:  #586e75; --base00:  #657b83;
+            --base0:   #839496; --base1:   #93a1a1;
+            --base2:   #eee8d5; --base3:   #fdf6e3;
+            --yellow:  #b58900; --orange:  #cb4b16;
+            --red:     #dc322f; --magenta: #d33682;
+            --violet:  #6c71c4; --blue:    #268bd2;
+            --cyan:    #2aa198; --green:   #859900;
+
+            --bg:      var(--base03);  --bg-hl:   var(--base02);
+            --fg:      var(--base0);   --fg-dim:  var(--base01);
+            --fg-em:   var(--base1);   --border:  var(--base01);
+        }
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg:     var(--base3);   --bg-hl:  var(--base2);
+                --fg:     var(--base00);  --fg-dim: var(--base1);
+                --fg-em:  var(--base01);  --border: var(--base1);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background: var(--bg);
+            color: var(--fg);
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 8px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .term {
+            border: 1px solid var(--border);
+            max-width: 500px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .titlebar {
+            background: var(--bg-hl);
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .titlebar-left { color: var(--green); font-weight: bold; }
+        .titlebar-left .prompt { color: var(--cyan); }
+        .titlebar-right { color: var(--fg-dim); font-size: 13px; text-align: right; }
+        .titlebar-right .date { color: var(--yellow); }
+
+        .section { border-top: 1px solid var(--border); }
+        .section-head {
+            background: var(--bg-hl);
+            padding: 8px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--blue);
+            font-weight: bold;
+            font-size: 13px;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .section-head .sub { color: var(--fg-dim); font-weight: normal; letter-spacing: 0; }
+        .section-body { padding: 12px 14px; }
+
+        /* Weather */
+        .wx-hero { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .wx-icon { font-size: 42px; line-height: 1; }
+        .wx-info { flex: 1; }
+        .wx-condition { color: var(--yellow); font-weight: bold; font-size: 16px; }
+        .wx-temps { display: flex; gap: 14px; margin-top: 4px; font-size: 14px; }
+        .wx-hi { color: var(--orange); font-weight: bold; }
+        .wx-lo { color: var(--blue); font-weight: bold; }
+        .wx-rain-pct { color: var(--cyan); font-weight: bold; }
+        .wx-detail { color: var(--fg-dim); font-size: 13px; margin-top: 6px; line-height: 1.6; }
+
+        .rain-box { border: 1px solid var(--border); padding: 8px 10px; margin-top: 10px; }
+        .rain-title { color: var(--fg-dim); font-size: 11px; margin-bottom: 4px; letter-spacing: 0.5px; }
+        .rain-chart { white-space: pre; line-height: 1.2; font-size: 16px; letter-spacing: 1px; }
+        .rain-labels { color: var(--fg-dim); font-size: 11px; white-space: pre; margin-top: 2px; }
+        .rain-lo  { color: var(--green); }
+        .rain-md  { color: var(--yellow); }
+        .rain-hi  { color: var(--orange); }
+        .rain-ex  { color: var(--red); }
+
+        .rain-pct-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .rain-pct-cell { text-align: center; min-width: 40px; }
+        .rain-pct-label { color: var(--fg-dim); font-size: 10px; }
+        .rain-pct-val { font-weight: bold; font-size: 13px; }
+
+        /* Calendar */
+        .cal-event {
+            border-left: 3px solid var(--cyan);
+            padding: 4px 0 4px 10px;
+            margin-bottom: 8px;
+        }
+        .cal-event:last-child { margin-bottom: 0; }
+        .cal-event-title { color: var(--fg-em); font-weight: bold; font-size: 14px; }
+        .cal-event-time { color: var(--yellow); font-size: 13px; }
+        .cal-event-cal { color: var(--fg-dim); font-size: 12px; }
+        .cal-event.work { border-left-color: var(--violet); }
+
+        .cal-none { color: var(--fg-dim); font-style: italic; }
+
+        /* Game cards */
+        .game-card { border: 1px solid var(--border); margin-bottom: 10px; overflow: hidden; }
+        .game-card:last-child { margin-bottom: 0; }
+        .game-card-head {
+            background: var(--bg-hl);
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--fg-dim);
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .game-card-body { padding: 10px; }
+
+        .score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 14px; }
+        .score-team { width: 40px; font-weight: bold; flex-shrink: 0; }
+        .score-bar-track {
+            flex: 1; height: 14px; background: var(--bg-hl);
+            border: 1px solid var(--border); overflow: hidden;
+        }
+        .score-bar-fill { height: 100%; }
+        .score-num { width: 26px; text-align: right; font-weight: bold; flex-shrink: 0; }
+
+        .team-cin { color: var(--red); }
+        .team-lal { color: var(--violet); }
+        .team-mia { color: var(--cyan); }
+        .team-uk  { color: var(--blue); }
+        .team-opp { color: var(--fg-em); }
+
+        .game-meta { color: var(--fg-dim); font-size: 13px; margin-top: 8px; line-height: 1.6; }
+        .game-meta .pitcher { color: var(--violet); }
+        .result-w { color: var(--green); font-weight: bold; }
+        .result-l { color: var(--red); font-weight: bold; }
+        .game-meta .time { color: var(--yellow); }
+        .game-meta .venue { color: var(--fg-dim); }
+
+        .matchup {
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px; padding: 6px 0 8px; font-size: 18px; font-weight: bold;
+        }
+        .matchup-vs { color: var(--fg-dim); font-size: 12px; font-weight: normal; }
+        .matchup-venue { text-align: center; color: var(--fg-dim); font-size: 12px; margin-bottom: 8px; }
+
+        .pitchers-box { border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 4px; }
+        .pitcher-row { display: flex; gap: 8px; font-size: 13px; margin-bottom: 3px; }
+        .pitcher-team { width: 34px; font-weight: bold; flex-shrink: 0; }
+        .pitcher-name { color: var(--violet); }
+
+        .none { color: var(--fg-dim); font-style: italic; }
+
+        .upcoming-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+        .upcoming-table td { padding: 3px 6px; border-bottom: 1px dotted var(--border); }
+        .upcoming-table td:first-child { color: var(--fg-dim); width: 70px; }
+        .upcoming-table td:nth-child(2) { color: var(--fg-em); }
+        .upcoming-table td:last-child { color: var(--yellow); text-align: right; }
+
+        .foot {
+            border-top: 1px solid var(--border);
+            background: var(--bg-hl);
+            padding: 10px 14px;
+            color: var(--fg-dim);
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="term">
+        <!-- TITLE BAR -->
+        <div class="titlebar">
+            <div class="titlebar-left"><span class="prompt">▸</span> morning-dashboard</div>
+            <div class="titlebar-right">
+                <span class="date">Mon, Apr 6</span> · 6:45 AM
+            </div>
+        </div>
+
+        <!-- WEATHER -->
+        <div class="section">
+            <div class="section-head">
+                <span>WEATHER</span>
+                <span class="sub">Prospect, KY</span>
+            </div>
+            <div class="section-body">
+                <div class="wx-hero">
+                    <span class="wx-icon">⛅</span>
+                    <div class="wx-info">
+                        <div class="wx-condition">Partly Cloudy</div>
+                        <div class="wx-temps">
+                            <span>▲ <span class="wx-hi">72°F</span></span>
+                            <span>▼ <span class="wx-lo">54°F</span></span>
+                            <span>☂ <span class="wx-rain-pct">35%</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="wx-detail">
+                    Partly cloudy through the morning, with a chance of afternoon showers. Winds SW 8-12 mph.
+                </div>
+                <div class="rain-box">
+                    <div class="rain-title">HOURLY RAIN %</div>
+                    <div class="rain-pct-row">
+                        <div class="rain-pct-cell">
+                            <div class="rain-pct-label">6a</div>
+                            <div class="rain-pct-val rain-lo">5%</div>
+                        </div>
+                        <div class="rain-pct-cell">
+                            <div class="rain-pct-label">9a</div>
+                            <div class="rain-pct-val rain-lo">10%</div>
+                        </div>
+                        <div class="rain-pct-cell">
+                            <div class="rain-pct-label">12p</div>
+                            <div class="rain-pct-val rain-md">25%</div>
+                        </div>
+                        <div class="rain-pct-cell">
+                            <div class="rain-pct-label">3p</div>
+                            <div class="rain-pct-val rain-hi">45%</div>
+                        </div>
+                        <div class="rain-pct-cell">
+                            <div class="rain-pct-label">6p</div>
+                            <div class="rain-pct-val rain-md">30%</div>
+                        </div>
+                        <div class="rain-pct-cell">
+                            <div class="rain-pct-label">9p</div>
+                            <div class="rain-pct-val rain-lo">10%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CALENDAR -->
+        <div class="section">
+            <div class="section-head">
+                <span>CALENDAR</span>
+                <span class="sub">Today's Schedule</span>
+            </div>
+            <div class="section-body">
+                <div class="cal-event work">
+                    <div class="cal-event-title">Team Standup</div>
+                    <div class="cal-event-time">9:00 AM – 9:15 AM</div>
+                    <div class="cal-event-cal">Work</div>
+                </div>
+                <div class="cal-event work">
+                    <div class="cal-event-title">Sprint Planning</div>
+                    <div class="cal-event-time">10:00 AM – 11:00 AM</div>
+                    <div class="cal-event-cal">Work</div>
+                </div>
+                <div class="cal-event">
+                    <div class="cal-event-title">Dentist Appointment</div>
+                    <div class="cal-event-time">2:30 PM – 3:30 PM</div>
+                    <div class="cal-event-cal">Personal</div>
+                </div>
+                <div class="cal-event work">
+                    <div class="cal-event-title">1:1 with Manager</div>
+                    <div class="cal-event-time">4:00 PM – 4:30 PM</div>
+                    <div class="cal-event-cal">Work</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REDS -->
+        <div class="section">
+            <div class="section-head">
+                <span>REDS</span>
+                <span class="sub">Cincinnati</span>
+            </div>
+            <div class="section-body">
+                <div class="game-card">
+                    <div class="game-card-head">
+                        <span>YESTERDAY</span>
+                        <span class="result-w">WIN</span>
+                    </div>
+                    <div class="game-card-body">
+                        <div class="score-row">
+                            <span class="score-team team-cin">CIN</span>
+                            <div class="score-bar-track"><div class="score-bar-fill" style="width:100%;background:var(--red)"></div></div>
+                            <span class="score-num team-cin">7</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-team team-opp">STL</span>
+                            <div class="score-bar-track"><div class="score-bar-fill" style="width:57%;background:var(--fg-dim)"></div></div>
+                            <span class="score-num team-opp">4</span>
+                        </div>
+                        <div class="game-meta">
+                            <span class="result-w">W</span>: <span class="pitcher">Hunter Greene</span> ·
+                            <span class="result-l">L</span>: <span class="pitcher">Sonny Gray</span> ·
+                            S: <span class="pitcher">Alexis Diaz</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-card">
+                    <div class="game-card-head"><span>TODAY</span><span class="time">7:10 PM ET</span></div>
+                    <div class="game-card-body">
+                        <div class="matchup">
+                            <span class="team-cin">CIN</span>
+                            <span class="matchup-vs">vs</span>
+                            <span class="team-opp">STL</span>
+                        </div>
+                        <div class="matchup-venue">@ Great American Ball Park</div>
+                        <div class="pitchers-box">
+                            <div class="pitcher-row"><span class="pitcher-team team-cin">CIN</span><span class="pitcher-name">Nick Lodolo</span></div>
+                            <div class="pitcher-row"><span class="pitcher-team team-opp">STL</span><span class="pitcher-name">Miles Mikolas</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-card">
+                    <div class="game-card-head"><span>UPCOMING</span></div>
+                    <div class="game-card-body">
+                        <table class="upcoming-table">
+                            <tr><td>Tue 4/7</td><td>vs STL</td><td>6:40 PM</td></tr>
+                            <tr><td>Wed 4/8</td><td>vs STL</td><td>12:35 PM</td></tr>
+                            <tr><td>Fri 4/10</td><td>@ CHC</td><td>2:20 PM</td></tr>
+                            <tr><td>Sat 4/11</td><td>@ CHC</td><td>2:20 PM</td></tr>
+                            <tr><td>Sun 4/12</td><td>@ CHC</td><td>1:20 PM</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOLPHINS -->
+        <div class="section">
+            <div class="section-head">
+                <span>DOLPHINS</span>
+                <span class="sub">Miami</span>
+            </div>
+            <div class="section-body">
+                <div class="game-card">
+                    <div class="game-card-head"><span>SEASON STATUS</span></div>
+                    <div class="game-card-body">
+                        <span class="none">Off-season — 2026 schedule TBD</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LAKERS -->
+        <div class="section">
+            <div class="section-head">
+                <span>LAKERS</span>
+                <span class="sub">Los Angeles</span>
+            </div>
+            <div class="section-body">
+                <div class="game-card">
+                    <div class="game-card-head">
+                        <span>YESTERDAY</span>
+                        <span class="result-l">LOSS</span>
+                    </div>
+                    <div class="game-card-body">
+                        <div class="score-row">
+                            <span class="score-team team-lal">LAL</span>
+                            <div class="score-bar-track"><div class="score-bar-fill" style="width:88%;background:var(--violet)"></div></div>
+                            <span class="score-num team-lal">105</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-team team-opp">GSW</span>
+                            <div class="score-bar-track"><div class="score-bar-fill" style="width:100%;background:var(--fg-dim)"></div></div>
+                            <span class="score-num team-opp">119</span>
+                        </div>
+                        <div class="game-meta">
+                            <span class="venue">@ Chase Center (Away)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="game-card">
+                    <div class="game-card-head"><span>UPCOMING</span></div>
+                    <div class="game-card-body">
+                        <table class="upcoming-table">
+                            <tr><td>Wed 4/8</td><td>vs PHX</td><td>10:00 PM</td></tr>
+                            <tr><td>Fri 4/10</td><td>@ DEN</td><td>9:00 PM</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UK BASKETBALL -->
+        <div class="section">
+            <div class="section-head">
+                <span>UK BASKETBALL</span>
+                <span class="sub">Kentucky</span>
+            </div>
+            <div class="section-body">
+                <div class="game-card">
+                    <div class="game-card-head"><span>SEASON STATUS</span></div>
+                    <div class="game-card-body">
+                        <span class="none">Season ended — NCAA Tournament</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UK FOOTBALL -->
+        <div class="section">
+            <div class="section-head">
+                <span>UK FOOTBALL</span>
+                <span class="sub">Kentucky</span>
+            </div>
+            <div class="section-body">
+                <div class="game-card">
+                    <div class="game-card-head"><span>SEASON STATUS</span></div>
+                    <div class="game-card-body">
+                        <span class="none">Off-season — Spring practice underway</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="foot">
+            Generated Mon, Apr 6 at 6:45 AM via Shortcuts
+        </div>
+    </div>
+</body>
+</html>
