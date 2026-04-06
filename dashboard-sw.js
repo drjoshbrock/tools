@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dashboard-v3';
+const CACHE_NAME = 'dashboard-v4';
 const ASSETS = [
   'dashboard.html',
   'dashboard-manifest.json'
@@ -25,7 +25,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // API calls: always go to network
-  if (url.hostname === 'api.open-meteo.com' || url.hostname === 'statsapi.mlb.com') {
+  if (url.hostname === 'api.open-meteo.com' || url.hostname === 'statsapi.mlb.com' || url.hostname === 'site.api.espn.com') {
     event.respondWith(fetch(event.request));
     return;
   }
