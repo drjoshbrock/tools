@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Dashboard</title>
+<style>
+:root {
+    --base03:#002b36;--base02:#073642;--base01:#586e75;--base00:#657b83;
+    --base0:#839496;--base1:#93a1a1;--base2:#eee8d5;--base3:#fdf6e3;
+    --yellow:#b58900;--orange:#cb4b16;--red:#dc322f;--magenta:#d33682;
+    --violet:#6c71c4;--blue:#268bd2;--cyan:#2aa198;--green:#859900;
+    --bg:var(--base03);--bg-hl:var(--base02);--fg:var(--base0);
+    --fg-dim:var(--base01);--fg-em:var(--base1);--border:var(--base01);
+}
+@media(prefers-color-scheme:light){:root{
+    --bg:var(--base3);--bg-hl:var(--base2);--fg:var(--base00);
+    --fg-dim:var(--base1);--fg-em:var(--base01);--border:var(--base1);
+}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',Courier,monospace;background:var(--bg);color:var(--fg);font-size:14px;line-height:1.5;padding:8px;-webkit-text-size-adjust:100%}
+.term{border:1px solid var(--border);max-width:500px;margin:0 auto;overflow:hidden}
+.titlebar{background:var(--bg-hl);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.titlebar-left{color:var(--green);font-weight:bold}
+.titlebar-left .prompt{color:var(--cyan)}
+.titlebar-right{color:var(--fg-dim);font-size:13px;text-align:right}
+.titlebar-right .date{color:var(--yellow)}
+.section{border-top:1px solid var(--border)}
+.section-head{background:var(--bg-hl);padding:8px 14px;border-bottom:1px solid var(--border);color:var(--blue);font-weight:bold;font-size:13px;letter-spacing:1px;display:flex;justify-content:space-between}
+.section-head .sub{color:var(--fg-dim);font-weight:normal;letter-spacing:0}
+.section-body{padding:12px 14px}
+.wx-hero{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.wx-icon{font-size:42px;line-height:1}
+.wx-info{flex:1}
+.wx-condition{color:var(--yellow);font-weight:bold;font-size:16px}
+.wx-temps{display:flex;gap:14px;margin-top:4px;font-size:14px}
+.wx-hi{color:var(--orange);font-weight:bold}
+.wx-lo{color:var(--blue);font-weight:bold}
+.wx-rain-pct{color:var(--cyan);font-weight:bold}
+.rain-box{border:1px solid var(--border);padding:8px 10px;margin-top:10px}
+.rain-title{color:var(--fg-dim);font-size:11px;margin-bottom:4px;letter-spacing:.5px}
+.rain-chart{white-space:pre;line-height:1.2;font-size:16px;letter-spacing:1px}
+.rain-labels{color:var(--fg-dim);font-size:11px;white-space:pre;margin-top:2px}
+.rain-lo{color:var(--green)}.rain-md{color:var(--yellow)}.rain-hi{color:var(--orange)}.rain-ex{color:var(--red)}
+.cal-event{border-left:3px solid var(--cyan);padding:4px 0 4px 10px;margin-bottom:8px}
+.cal-event:last-child{margin-bottom:0}
+.cal-event-title{color:var(--fg-em);font-weight:bold;font-size:14px}
+.cal-event-time{color:var(--yellow);font-size:13px}
+.cal-none{color:var(--fg-dim);font-style:italic}
+.game-card{border:1px solid var(--border);margin-bottom:10px;overflow:hidden}
+.game-card:last-child{margin-bottom:0}
+.game-card-head{background:var(--bg-hl);padding:5px 10px;border-bottom:1px solid var(--border);color:var(--fg-dim);font-size:12px;letter-spacing:.5px;display:flex;justify-content:space-between}
+.game-card-body{padding:10px}
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:14px}
+.score-team{width:40px;font-weight:bold;flex-shrink:0}
+.score-bar-track{flex:1;height:14px;background:var(--bg-hl);border:1px solid var(--border);overflow:hidden}
+.score-bar-fill{height:100%}
+.score-num{width:26px;text-align:right;font-weight:bold;flex-shrink:0}
+.team-cin{color:var(--red)}.team-lal{color:var(--violet)}.team-mia{color:var(--cyan)}.team-uk{color:var(--blue)}.team-opp{color:var(--fg-em)}
+.game-meta{color:var(--fg-dim);font-size:13px;margin-top:8px;line-height:1.6}
+.game-meta .pitcher{color:var(--violet)}
+.result-w{color:var(--green);font-weight:bold}
+.result-l{color:var(--red);font-weight:bold}
+.game-meta .time{color:var(--yellow)}
+.game-meta .venue{color:var(--fg-dim)}
+.matchup{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 0 8px;font-size:18px;font-weight:bold}
+.matchup-vs{color:var(--fg-dim);font-size:12px;font-weight:normal}
+.matchup-venue{text-align:center;color:var(--fg-dim);font-size:12px;margin-bottom:8px}
+.upcoming-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.upcoming-table td{padding:3px 6px;border-bottom:1px dotted var(--border)}
+.upcoming-table td:first-child{color:var(--fg-dim);width:70px}
+.upcoming-table td:nth-child(2){color:var(--fg-em)}
+.upcoming-table td:last-child{color:var(--yellow);text-align:right}
+.none{color:var(--fg-dim);font-style:italic}
+.loading{color:var(--fg-dim);animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.error{color:var(--red)}
+.foot{border-top:1px solid var(--border);background:var(--bg-hl);padding:10px 14px;color:var(--fg-dim);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="term">
+    <div class="titlebar">
+        <div class="titlebar-left"><span class="prompt">&#9654;</span> morning-dashboard</div>
+        <div class="titlebar-right" id="hdr"></div>
+    </div>
+    <div class="section">
+        <div class="section-head"><span>WEATHER</span><span class="sub">Prospect, KY</span></div>
+        <div class="section-body" id="wx"><span class="loading">loading...</span></div>
+    </div>
+    <div class="section">
+        <div class="section-head"><span>CALENDAR</span><span class="sub">Today</span></div>
+        <div class="section-body" id="cal"><!--CALENDAR_DATA--></div>
+    </div>
+    <div class="section">
+        <div class="section-head"><span>REDS</span><span class="sub">Cincinnati</span></div>
+        <div class="section-body" id="reds"><span class="loading">loading...</span></div>
+    </div>
+    <div class="section">
+        <div class="section-head"><span>DOLPHINS</span><span class="sub">Miami</span></div>
+        <div class="section-body" id="dolphins"><span class="loading">loading...</span></div>
+    </div>
+    <div class="section">
+        <div class="section-head"><span>LAKERS</span><span class="sub">Los Angeles</span></div>
+        <div class="section-body" id="lakers"><span class="loading">loading...</span></div>
+    </div>
+    <div class="section">
+        <div class="section-head"><span>UK BASKETBALL</span><span class="sub">Kentucky</span></div>
+        <div class="section-body" id="ukbb"><span class="loading">loading...</span></div>
+    </div>
+    <div class="section">
+        <div class="section-head"><span>UK FOOTBALL</span><span class="sub">Kentucky</span></div>
+        <div class="section-body" id="ukfb"><span class="loading">loading...</span></div>
+    </div>
+    <div class="foot" id="foot">loading...</div>
+</div>
+<script>
+const TZ='America/New_York', LAT=38.40, LON=-85.61;
+const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
+const todayStr=()=>new Date().toLocaleDateString('en-CA',{timeZone:TZ});
+const yesterdayStr=()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toLocaleDateString('en-CA',{timeZone:TZ})};
+const todayESPN=()=>todayStr().replace(/-/g,'');
+const yesterdayESPN=()=>yesterdayStr().replace(/-/g,'');
+
+// Header
+function renderHeader(){
+    const now=new Date();
+    const date=now.toLocaleDateString('en-US',{timeZone:TZ,weekday:'short',month:'short',day:'numeric'});
+    const time=now.toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+    document.getElementById('hdr').innerHTML=`<span class="date">${esc(date)}</span> &middot; ${esc(time)}`;
+    document.getElementById('foot').textContent=`Generated ${date} at ${time} via Shortcuts`;
+}
+
+// Calendar fallback
+function checkCal(){
+    const el=document.getElementById('cal');
+    if(!el.innerHTML.trim()||el.innerHTML.trim()==='')
+        el.innerHTML='<span class="cal-none">No events today</span>';
+}
+
+// Weather
+const WMO={0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Light Drizzle',53:'Drizzle',55:'Heavy Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Light Snow',73:'Snow',75:'Heavy Snow',80:'Light Showers',81:'Showers',82:'Heavy Showers',95:'Thunderstorm',96:'T-Storm + Hail',99:'T-Storm + Hail'};
+const WMO_ICON={0:'\u2600\uFE0F',1:'\uD83C\uDF24\uFE0F',2:'\u26C5',3:'\u2601\uFE0F',45:'\uD83C\uDF2B\uFE0F',48:'\uD83C\uDF2B\uFE0F',51:'\uD83C\uDF26\uFE0F',53:'\uD83C\uDF26\uFE0F',55:'\uD83C\uDF27\uFE0F',61:'\uD83C\uDF26\uFE0F',63:'\uD83C\uDF27\uFE0F',65:'\uD83C\uDF27\uFE0F',71:'\uD83C\uDF28\uFE0F',73:'\uD83C\uDF28\uFE0F',75:'\u2744\uFE0F',80:'\uD83C\uDF26\uFE0F',81:'\uD83C\uDF27\uFE0F',82:'\u26C8\uFE0F',95:'\u26C8\uFE0F',96:'\u26C8\uFE0F',99:'\u26C8\uFE0F'};
+
+function rainBlock(pct){
+    const blocks=' \u2581\u2582\u2583\u2584\u2585\u2586\u2587\u2588';
+    const i=Math.min(8,Math.round(pct/100*8));
+    const cls=pct>60?'rain-ex':pct>40?'rain-hi':pct>20?'rain-md':'rain-lo';
+    return `<span class="${cls}">${blocks[i]}</span>`;
+}
+
+async function loadWeather(){
+    const el=document.getElementById('wx');
+    try{
+        const url=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=precipitation_probability&temperature_unit=fahrenheit&timezone=${TZ}&forecast_days=1`;
+        const data=await(await fetch(url)).json();
+        const hi=Math.round(data.daily.temperature_2m_max[0]),lo=Math.round(data.daily.temperature_2m_min[0]);
+        const code=data.daily.weathercode[0],rainMax=data.daily.precipitation_probability_max[0];
+        const cond=WMO[code]||'Unknown',icon=WMO_ICON[code]||'?';
+        const hourly=data.hourly.precipitation_probability.slice(0,24);
+        let bars='';for(let i=6;i<=23;i++)bars+=rainBlock(hourly[i]);
+        el.innerHTML=`<div class="wx-hero"><span class="wx-icon">${icon}</span><div class="wx-info"><div class="wx-condition">${esc(cond)}</div><div class="wx-temps"><span>\u25B2 <span class="wx-hi">${hi}\u00B0F</span></span><span>\u25BC <span class="wx-lo">${lo}\u00B0F</span></span><span>\u2602 <span class="wx-rain-pct">${rainMax}%</span></span></div></div></div><div class="rain-box"><div class="rain-title">HOURLY RAIN %</div><div class="rain-chart">${bars}</div><div class="rain-labels">6a    9a    12p   3p    6p    9p</div></div>`;
+    }catch(e){el.innerHTML=`<span class="error">\u2717 ${esc(e.message)}</span>`}
+}
+
+// MLB Reds
+const REDS_ID=113;
+const MLB_TEAMS={'Cincinnati Reds':'CIN','St. Louis Cardinals':'STL','Chicago Cubs':'CHC','Milwaukee Brewers':'MIL','Pittsburgh Pirates':'PIT','Atlanta Braves':'ATL','New York Mets':'NYM','Philadelphia Phillies':'PHI','Washington Nationals':'WSH','Miami Marlins':'MIA','Los Angeles Dodgers':'LAD','San Francisco Giants':'SF','San Diego Padres':'SD','Arizona Diamondbacks':'ARI','Colorado Rockies':'COL','New York Yankees':'NYY','Boston Red Sox':'BOS','Tampa Bay Rays':'TB','Toronto Blue Jays':'TOR','Baltimore Orioles':'BAL','Minnesota Twins':'MIN','Cleveland Guardians':'CLE','Chicago White Sox':'CWS','Detroit Tigers':'DET','Kansas City Royals':'KC','Houston Astros':'HOU','Texas Rangers':'TEX','Seattle Mariners':'SEA','Los Angeles Angels':'LAA','Oakland Athletics':'OAK'};
+const mlbAbbr=name=>MLB_TEAMS[name]||name.slice(0,3).toUpperCase();
+
+function noGameCard(label){return `<div class="game-card"><div class="game-card-head"><span>${esc(label)}</span></div><div class="game-card-body"><span class="none">No game</span></div></div>`}
+
+function mlbScoreCard(game,label){
+    const isHome=game.teams.home.team.id===REDS_ID;
+    const reds=isHome?game.teams.home:game.teams.away;
+    const opp=isHome?game.teams.away:game.teams.home;
+    const rR=reds.score??0,oR=opp.score??0,maxR=Math.max(rR,oR,1);
+    const won=rR>oR;const oppA=mlbAbbr(opp.team.name);
+    const dec=game.decisions||{};
+    let meta='';
+    if(dec.winner)meta+=`<span class="result-w">W</span>: <span class="pitcher">${esc(dec.winner.fullName)}</span>`;
+    if(dec.loser)meta+=` &middot; <span class="result-l">L</span>: <span class="pitcher">${esc(dec.loser.fullName)}</span>`;
+    if(dec.save)meta+=` &middot; S: <span class="pitcher">${esc(dec.save.fullName)}</span>`;
+    return `<div class="game-card"><div class="game-card-head"><span>${esc(label)}</span><span>${won?'<span class="result-w">WIN</span>':'<span class="result-l">LOSS</span>'}</span></div><div class="game-card-body"><div class="score-row"><span class="score-team team-cin">CIN</span><div class="score-bar-track"><div class="score-bar-fill" style="width:${maxR>0?rR/maxR*100:0}%;background:var(--red)"></div></div><span class="score-num team-cin">${rR}</span></div><div class="score-row"><span class="score-team team-opp">${esc(oppA)}</span><div class="score-bar-track"><div class="score-bar-fill" style="width:${maxR>0?oR/maxR*100:0}%;background:var(--fg-dim)"></div></div><span class="score-num team-opp">${oR}</span></div>${meta?`<div class="game-meta">${meta}</div>`:''}</div></div>`;
+}
+
+function mlbScheduledCard(game){
+    const isHome=game.teams.home.team.id===REDS_ID;
+    const opp=isHome?game.teams.away:game.teams.home;const oppA=mlbAbbr(opp.team.name);
+    const vs=isHome?'vs':'@';
+    const time=new Date(game.gameDate).toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+    return `<div class="game-card"><div class="game-card-head"><span>TODAY</span><span class="time">${esc(time)} ET</span></div><div class="game-card-body"><div class="matchup"><span class="team-cin">CIN</span><span class="matchup-vs">${vs}</span><span class="team-opp">${esc(oppA)}</span></div></div></div>`;
+}
+
+async function loadReds(){
+    const el=document.getElementById('reds');
+    try{
+        const[yD,tD]=await Promise.all([
+            fetch(`https://statsapi.mlb.com/api/v1/schedule?teamId=${REDS_ID}&date=${yesterdayStr()}&sportId=1&hydrate=probablePitcher,linescore,decisions,team`).then(r=>r.json()),
+            fetch(`https://statsapi.mlb.com/api/v1/schedule?teamId=${REDS_ID}&date=${todayStr()}&sportId=1&hydrate=probablePitcher,linescore,decisions,team`).then(r=>r.json())
+        ]);
+        let html='';
+        const yg=yD.dates?.[0]?.games?.[0];
+        if(yg){const st=yg.status?.detailedState||'';html+=(st.startsWith('Final')||st==='Game Over')?mlbScoreCard(yg,'YESTERDAY'):noGameCard('YESTERDAY')}else html+=noGameCard('YESTERDAY');
+        const tg=tD.dates?.[0]?.games?.[0];
+        if(tg){const st=tg.status?.detailedState||'';if(st.startsWith('Final')||st==='Game Over')html+=mlbScoreCard(tg,'TODAY \u2014 FINAL');else if(st==='In Progress'||st.includes('Progress'))html+=mlbScoreCard(tg,'LIVE');else html+=mlbScheduledCard(tg)}else html+=noGameCard('TODAY');
+        el.innerHTML=html;
+    }catch(e){el.innerHTML=`<span class="error">\u2717 ${esc(e.message)}</span>`}
+}
+
+// ESPN helper for NBA/NFL/College
+function findESPNGame(data,teamId){
+    if(!data?.events)return null;
+    for(const ev of data.events){const c=ev.competitions?.[0];if(c&&c.competitors.some(x=>x.team.id===teamId))return c}return null;
+}
+
+function espnScoreCard(comp,teamId,teamAbbr,teamClass,color,label){
+    const mine=comp.competitors.find(c=>c.team.id===teamId);
+    const opp=comp.competitors.find(c=>c.team.id!==teamId);
+    const mS=parseInt(mine.score)||0,oS=parseInt(opp.score)||0,maxS=Math.max(mS,oS,1);
+    const won=mine.winner;const oppA=opp.team.abbreviation;
+    return `<div class="game-card"><div class="game-card-head"><span>${esc(label)}</span><span>${won?'<span class="result-w">WIN</span>':'<span class="result-l">LOSS</span>'}</span></div><div class="game-card-body"><div class="score-row"><span class="score-team ${teamClass}">${esc(teamAbbr)}</span><div class="score-bar-track"><div class="score-bar-fill" style="width:${mS/maxS*100}%;background:var(--${color})"></div></div><span class="score-num ${teamClass}">${mS}</span></div><div class="score-row"><span class="score-team team-opp">${esc(oppA)}</span><div class="score-bar-track"><div class="score-bar-fill" style="width:${oS/maxS*100}%;background:var(--fg-dim)"></div></div><span class="score-num team-opp">${oS}</span></div><div class="game-meta"><span class="venue">@ ${esc(comp.venue?.fullName||'')} (${mine.homeAway==='home'?'Home':'Away'})</span></div></div></div>`;
+}
+
+function espnScheduledCard(comp,teamId,teamAbbr,teamClass){
+    const mine=comp.competitors.find(c=>c.team.id===teamId);
+    const opp=comp.competitors.find(c=>c.team.id!==teamId);
+    const vs=mine.homeAway==='home'?'vs':'@';const oppA=opp.team.abbreviation;
+    const time=new Date(comp.date).toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+    return `<div class="game-card"><div class="game-card-head"><span>TODAY</span><span class="time">${esc(time)} ET</span></div><div class="game-card-body"><div class="matchup"><span class="${teamClass}">${esc(teamAbbr)}</span><span class="matchup-vs">${vs}</span><span class="team-opp">${esc(oppA)}</span></div></div></div>`;
+}
+
+async function loadESPNTeam(elId,sport,league,teamId,teamAbbr,teamClass,color){
+    const el=document.getElementById(elId);
+    try{
+        const[yD,tD]=await Promise.all([
+            fetch(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard?dates=${yesterdayESPN()}`).then(r=>r.json()),
+            fetch(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard?dates=${todayESPN()}`).then(r=>r.json())
+        ]);
+        let html='';
+        const yC=findESPNGame(yD,teamId);
+        if(yC&&yC.status?.type?.completed)html+=espnScoreCard(yC,teamId,teamAbbr,teamClass,color,'YESTERDAY');
+        else html+=noGameCard('YESTERDAY');
+        const tC=findESPNGame(tD,teamId);
+        if(tC){
+            const st=tC.status?.type;
+            if(st?.completed)html+=espnScoreCard(tC,teamId,teamAbbr,teamClass,color,'TODAY \u2014 FINAL');
+            else if(st?.state==='in')html+=espnScoreCard(tC,teamId,teamAbbr,teamClass,color,'LIVE');
+            else html+=espnScheduledCard(tC,teamId,teamAbbr,teamClass);
+        }else html+=noGameCard('TODAY');
+        el.innerHTML=html;
+    }catch(e){el.innerHTML=`<span class="error">\u2717 ${esc(e.message)}</span>`}
+}
+
+// Init
+renderHeader();
+checkCal();
+loadWeather();
+loadReds();
+loadESPNTeam('dolphins','football','nfl','15','MIA','team-mia','cyan');
+loadESPNTeam('lakers','basketball','nba','13','LAL','team-lal','violet');
+loadESPNTeam('ukbb','basketball','mens-college-basketball','96','UK','team-uk','blue');
+loadESPNTeam('ukfb','football','college-football','96','UK','team-uk','blue');
+</script>
+</body>
+</html>
