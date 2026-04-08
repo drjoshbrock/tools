@@ -94,31 +94,24 @@ struct TitleBarView: View {
     private var dateStr: String {
         let df = DateFormatter()
         df.timeZone = DashboardConfig.tz
-        df.dateFormat = "EEE MMM d"
-        return df.string(from: Date())
-    }
-
-    private var timeStr: String {
-        let df = DateFormatter()
-        df.timeZone = DashboardConfig.tz
-        df.dateFormat = "h:mm a"
-        return df.string(from: Date())
+        df.dateFormat = "EEEE, MMMM d"
+        return df.string(from: Date()).uppercased()
     }
 
     var body: some View {
-        HStack {
-            (Text("▸").foregroundColor(Sol.cyan) +
-             Text(" morning-dashboard").foregroundColor(Sol.green))
-                .font(.system(size: 14, design: .monospaced))
+        VStack(spacing: 4) {
+            Text("GOOD MORNING")
+                .font(.system(size: 22, design: .monospaced))
                 .fontWeight(.bold)
-            Spacer()
-            (Text(dateStr).foregroundColor(Sol.yellow) +
-             Text(" · ").foregroundColor(theme.fgDim) +
-             Text(timeStr).foregroundColor(theme.fgDim))
+                .foregroundColor(Sol.orange)
+                .tracking(2)
+            Text(dateStr)
                 .font(.system(size: 13, design: .monospaced))
+                .foregroundColor(theme.fgDim)
         }
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
         .background(theme.bgHighlight)
         .overlay(Rectangle().fill(theme.border).frame(height: 1), alignment: .bottom)
     }

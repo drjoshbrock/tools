@@ -78,7 +78,7 @@ struct RedsSectionView: View {
 
         case .live(let myScore, let oppAbbr, let oppScore, let detail):
             GameCardContainer(label: "LIVE", theme: theme) {
-                Text(detail).foregroundColor(Sol.yellow)
+                Text(detail).foregroundColor(Sol.orange)
             } content: {
                 let maxS = max(myScore, oppScore, 1)
                 VStack(spacing: 4) {
@@ -90,7 +90,7 @@ struct RedsSectionView: View {
         case .upcoming(let oppAbbr, let vs, let time, let venue,
                        let redsPitcher, let oppPitcher, let oppPitcherAbbr):
             GameCardContainer(label: "UPCOMING", theme: theme) {
-                Text(time).foregroundColor(Sol.yellow)
+                Text(time).foregroundColor(Sol.orange)
             } content: {
                 VStack(spacing: 0) {
                     MatchupView(myAbbr: "CIN", myColor: Sol.red, oppAbbr: oppAbbr,

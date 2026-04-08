@@ -96,7 +96,7 @@ struct WeatherSectionView: View {
                     Text(condition)
                         .font(.system(size: 16, design: .monospaced))
                         .fontWeight(.bold)
-                        .foregroundColor(Sol.yellow)
+                        .foregroundColor(Sol.magenta)
                     HStack(spacing: 14) {
                         Text("▲").foregroundColor(theme.fg) +
                         Text(" \(hi)°F").foregroundColor(Sol.orange).bold()
@@ -134,7 +134,7 @@ struct WeatherSectionView: View {
                 ForEach(6...23, id: \.self) { i in
                     let pct = hourlyRain[i]
                     let idx = min(8, Int((Double(pct) / 100.0 * 8).rounded()))
-                    let color: Color = pct > 60 ? Sol.red : pct > 40 ? Sol.orange : pct > 20 ? Sol.yellow : Sol.green
+                    let color: Color = pct > 60 ? Sol.red : pct > 40 ? Sol.orange : pct > 20 ? Sol.orange : Sol.green
                     Text(String(blocks[idx]))
                         .foregroundColor(color)
                 }
@@ -163,28 +163,28 @@ struct WeatherSectionView: View {
         let range = max(maxT - minT, 1)
 
         VStack(alignment: .leading, spacing: 2) {
-            Text("┌─ HOURLY TEMP °F ──────────────────────────────┐")
+            Text("┌─ HOURLY TEMP °F ─────────────────────────────────────┐")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
 
-            HStack(spacing: 1) {
+            HStack(spacing: 2) {
                 ForEach(0..<slice.count, id: \.self) { i in
                     let t = slice[i]
                     let norm = (t - minT) / range
                     let idx = min(8, Int((norm * 8).rounded()))
-                    let color: Color = t > 90 ? Sol.red : t > 75 ? Sol.orange : t > 55 ? Sol.yellow : Sol.cyan
+                    let color: Color = t > 90 ? Sol.red : t > 75 ? Sol.orange : t > 55 ? Sol.magenta : Sol.cyan
                     Text(String(blocks[idx]))
                         .foregroundColor(color)
                 }
             }
-            .font(.system(size: 22, design: .monospaced))
-            .tracking(2)
+            .font(.system(size: 26, design: .monospaced))
+            .tracking(3)
 
-            Text("6a      9a      12p     3p      6p      9p")
+            Text("6a       9a       12p      3p       6p       9p")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
 
-            Text("└──────────────────────────────────────────────┘")
+            Text("└────────────────────────────────────────────────────────┘")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
         }

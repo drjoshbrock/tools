@@ -98,7 +98,7 @@ struct ESPNSectionView: View {
         case .live(let myAbbr, let myColor, let myScore,
                    let oppAbbr, let oppScore, let detail):
             GameCardContainer(label: "LIVE", theme: theme) {
-                Text(detail).foregroundColor(Sol.yellow)
+                Text(detail).foregroundColor(Sol.orange)
             } content: {
                 let maxS = max(myScore, oppScore, 1)
                 VStack(spacing: 4) {
@@ -110,7 +110,7 @@ struct ESPNSectionView: View {
         case .upcoming(let myAbbr, let myColor, let oppAbbr,
                        let vs, let time, let venue, let odds, let label):
             GameCardContainer(label: label, theme: theme) {
-                Text(time).foregroundColor(Sol.yellow)
+                Text(time).foregroundColor(Sol.orange)
             } content: {
                 VStack(spacing: 0) {
                     MatchupView(myAbbr: myAbbr, myColor: myColor, oppAbbr: oppAbbr,
@@ -118,7 +118,7 @@ struct ESPNSectionView: View {
                     if let odds, !odds.isEmpty {
                         Text(odds)
                             .font(.system(size: 13, design: .monospaced))
-                            .foregroundColor(Sol.yellow)
+                            .foregroundColor(Sol.orange)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.top, 6)
                     }

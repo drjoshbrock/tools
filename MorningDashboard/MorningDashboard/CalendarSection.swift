@@ -92,11 +92,11 @@ struct CalendarSectionView: View {
             Group {
                 if event.isNow {
                     Text("▸ ").foregroundColor(Sol.green).bold() +
-                    Text(event.timeString).foregroundColor(Sol.yellow).bold() +
+                    Text(event.timeString).foregroundColor(Sol.orange).bold() +
                     Text(": ").foregroundColor(theme.fgDim) +
                     Text(event.title).foregroundColor(theme.fgEmphasis)
                 } else {
-                    Text(event.timeString).foregroundColor(Sol.yellow).bold() +
+                    Text(event.timeString).foregroundColor(Sol.orange).bold() +
                     Text(": ").foregroundColor(theme.fgDim) +
                     Text(event.title).foregroundColor(theme.fgEmphasis)
                 }
