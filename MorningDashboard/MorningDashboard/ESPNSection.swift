@@ -14,7 +14,7 @@ private struct ESPNCompetition: Codable {
     let competitors: [ESPNCompetitor]?
     let status: ESPNStatus?
     let venue: ESPNVenue?
-    let date: String
+    let date: String?
     let odds: [ESPNOdds]?
 }
 
@@ -104,23 +104,28 @@ struct ESPNSectionView: View {
     let refreshTrigger: Int
 
     @State private var games: [ESPNGameInfo] = []
-    @State private var hasData = false
+    @State private var isLoading = true
     @State private var error: String?
 
     var body: some View {
-        Group {
-            if hasData {
-                DashboardSection(title: config.sectionTitle, subtitle: config.sectionSubtitle, theme: theme) {
-                    if let error {
-                        Text("✗ \(error)")
-                            .font(.system(size: 14, design: .monospaced))
-                            .foregroundColor(Sol.red)
-                    } else {
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(Array(games.enumerated()), id: \.offset) { _, game in
-                                espnGameView(game)
-                            }
-                        }
+        DashboardSection(title: config.sectionTitle, subtitle: config.sectionSubtitle, theme: theme) {
+            if isLoading {
+                Text("loading...")
+                    .font(.system(size: 14, design: .monospaced))
+                    .foregroundColor(theme.fgDim)
+            } else if let error {
+                Text("✗ \(error)")
+                    .font(.system(size: 14, design: .monospaced))
+                    .foregroundColor(Sol.red)
+            } else if games.isEmpty {
+                Text("No games found")
+                    .font(.system(size: 14, design: .monospaced))
+                    .foregroundColor(theme.fgDim)
+                    .italic()
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(games.enumerated()), id: \.offset) { _, game in
+                        espnGameView(game)
                     }
                 }
             }
@@ -226,10 +231,10 @@ struct ESPNSectionView: View {
             }
 
             games = result
-            hasData = !result.isEmpty
+            isLoading = false
             self.error = nil
         } catch {
-            hasData = true
+            isLoading = false
             self.error = error.localizedDescription
         }
     }
@@ -251,7 +256,7 @@ struct ESPNSectionView: View {
                       let competitors = comp.competitors,
                       competitors.contains(where: { $0.team.id == config.teamId }) else { continue }
 
-                let gameDate = parseISO8601(comp.date)
+                let gameDate = parseISO8601(comp.date ?? "")
                 let st = comp.status?.type
 
                 if st?.completed == true {
@@ -294,9 +299,9 @@ struct ESPNSectionView: View {
             }
 
             games = result
-            hasData = !result.isEmpty
+            isLoading = false
         } catch {
-            hasData = false
+            isLoading = false
         }
     }
 
@@ -335,7 +340,7 @@ struct ESPNSectionView: View {
                          detail: st?.shortDetail ?? "")
         } else {
             let vs = isHome ? "vs" : "@"
-            let gameDate = parseISO8601(comp.date)
+            let gameDate = parseISO8601(comp.date ?? "")
             let timeFmt = DateFormatter()
             timeFmt.timeZone = DashboardConfig.tz
             timeFmt.dateFormat = "h:mm a"

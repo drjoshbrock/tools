@@ -94,23 +94,28 @@ struct RedsSectionView: View {
     let refreshTrigger: Int
 
     @State private var games: [RedsGameType] = []
-    @State private var hasData = false
+    @State private var isLoading = true
     @State private var error: String?
 
     var body: some View {
-        Group {
-            if hasData {
-                DashboardSection(title: "REDS", subtitle: "Cincinnati", theme: theme) {
-                    if let error {
-                        Text("✗ \(error)")
-                            .font(.system(size: 14, design: .monospaced))
-                            .foregroundColor(Sol.red)
-                    } else {
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(Array(games.enumerated()), id: \.offset) { _, game in
-                                gameView(game)
-                            }
-                        }
+        DashboardSection(title: "REDS", subtitle: "Cincinnati", theme: theme) {
+            if isLoading {
+                Text("loading...")
+                    .font(.system(size: 14, design: .monospaced))
+                    .foregroundColor(theme.fgDim)
+            } else if let error {
+                Text("✗ \(error)")
+                    .font(.system(size: 14, design: .monospaced))
+                    .foregroundColor(Sol.red)
+            } else if games.isEmpty {
+                Text("No games found")
+                    .font(.system(size: 14, design: .monospaced))
+                    .foregroundColor(theme.fgDim)
+                    .italic()
+            } else {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(games.enumerated()), id: \.offset) { _, game in
+                        gameView(game)
                     }
                 }
             }
@@ -246,10 +251,10 @@ struct RedsSectionView: View {
             }
 
             games = result
-            hasData = !result.isEmpty
+            isLoading = false
             error = nil
         } catch {
-            hasData = true
+            isLoading = false
             self.error = error.localizedDescription
         }
     }
