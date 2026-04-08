@@ -16,6 +16,7 @@
 		408BF9C62DA5C3D400A1B2C3 /* ESPNSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BF9B62DA5C3D400A1B2C3 /* ESPNSection.swift */; };
 		408BF9C72DA5C3D400A1B2C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 408BF9B72DA5C3D400A1B2C3 /* Assets.xcassets */; };
 		408BF9C82DA5C3D400A1B2C3 /* SportsDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */; };
+		408BF9C92DA5C3D400A1B2C3 /* Morning Dashboard Icon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 408BF9BB2DA5C3D400A1B2C3 /* Morning Dashboard Icon.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		408BF9B82DA5C3D400A1B2C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		408BF9B92DA5C3D400A1B2C3 /* MorningDashboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MorningDashboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportsDataStore.swift; sourceTree = "<group>"; };
+		408BF9BB2DA5C3D400A1B2C3 /* Morning Dashboard Icon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "Morning Dashboard Icon.icon"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +73,7 @@
 				408BF9B62DA5C3D400A1B2C3 /* ESPNSection.swift */,
 				408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */,
 				408BF9B72DA5C3D400A1B2C3 /* Assets.xcassets */,
+				408BF9BB2DA5C3D400A1B2C3 /* Morning Dashboard Icon.icon */,
 				408BF9B82DA5C3D400A1B2C3 /* Info.plist */,
 			);
 			path = MorningDashboard;
@@ -135,6 +138,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				408BF9C72DA5C3D400A1B2C3 /* Assets.xcassets in Resources */,
+				408BF9C92DA5C3D400A1B2C3 /* Morning Dashboard Icon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,7 +283,7 @@
 		408BF9F22DA5C3D400A1B2C3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -306,7 +310,7 @@
 		408BF9F32DA5C3D400A1B2C3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
