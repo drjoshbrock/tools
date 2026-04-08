@@ -16,6 +16,7 @@ private struct WeatherDaily: Codable {
 
 private struct WeatherHourly: Codable {
     let precipitation_probability: [Int]
+    let temperature_2m: [Double]
 }
 
 // MARK: - WMO Codes
@@ -56,6 +57,7 @@ struct WeatherSectionView: View {
     @State private var icon = ""
     @State private var rainMax = 0
     @State private var hourlyRain: [Int] = []
+    @State private var hourlyTemp: [Double] = []
     @State private var isLoading = true
     @State private var error: String?
 
@@ -109,7 +111,11 @@ struct WeatherSectionView: View {
                 }
             }
 
-            if hourlyRain.count >= 24 {
+            if hourlyTemp.count >= 24 {
+                tempBox
+            }
+
+            if hourlyRain.count >= 24 && hourlyRain[6...23].contains(where: { $0 >= 5 }) {
                 rainBox
             }
         }
@@ -148,11 +154,59 @@ struct WeatherSectionView: View {
         .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
     }
 
+    @ViewBuilder
+    private var tempBox: some View {
+        let blocks: [Character] = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+        let slice = Array(hourlyTemp[6...23])
+        let minT = slice.min() ?? 0
+        let maxT = slice.max() ?? 100
+        let range = max(maxT - minT, 1)
+
+        VStack(alignment: .leading, spacing: 2) {
+            Text("┌─ HOURLY TEMP °F ────────────────┐")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(theme.fgDim)
+
+            HStack(spacing: 0) {
+                ForEach(0..<slice.count, id: \.self) { i in
+                    let t = slice[i]
+                    let norm = (t - minT) / range
+                    let idx = min(8, Int((norm * 8).rounded()))
+                    let color: Color = t > 90 ? Sol.red : t > 75 ? Sol.orange : t > 55 ? Sol.yellow : Sol.cyan
+                    Text(String(blocks[idx]))
+                        .foregroundColor(color)
+                }
+            }
+            .font(.system(size: 16, design: .monospaced))
+            .tracking(1)
+
+            Text("6a    9a    12p   3p    6p    9p")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(theme.fgDim)
+
+            HStack {
+                Text("\(Int(minT.rounded()))°")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(Sol.cyan)
+                Spacer()
+                Text("\(Int(maxT.rounded()))°")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(Sol.orange)
+            }
+
+            Text("└─────────────────────────────────┘")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(theme.fgDim)
+        }
+        .padding(8)
+        .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
+    }
+
     private func loadWeather() async {
         isLoading = true
         error = nil
         do {
-            let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(DashboardConfig.lat)&longitude=\(DashboardConfig.lon)&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=precipitation_probability&temperature_unit=fahrenheit&timezone=America/New_York&forecast_days=1"
+            let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(DashboardConfig.lat)&longitude=\(DashboardConfig.lon)&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=precipitation_probability,temperature_2m&temperature_unit=fahrenheit&timezone=America/New_York&forecast_days=1"
             let (data, _) = try await URLSession.shared.data(from: URL(string: urlStr)!)
             let resp = try JSONDecoder().decode(WeatherResponse.self, from: data)
             hi = Int(resp.daily.temperature_2m_max[0].rounded())
@@ -162,6 +216,7 @@ struct WeatherSectionView: View {
             icon = wmoIcons[code] ?? "?"
             rainMax = resp.daily.precipitation_probability_max[0]
             hourlyRain = resp.hourly.precipitation_probability
+            hourlyTemp = resp.hourly.temperature_2m
         } catch {
             self.error = error.localizedDescription
         }

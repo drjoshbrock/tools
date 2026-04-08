@@ -13,7 +13,7 @@ private struct CalendarEvent: Identifiable {
         if isAllDay { return "ALL DAY" }
         let df = DateFormatter()
         df.dateFormat = "h:mm a"
-        return df.string(from: startDate)
+        return "\(df.string(from: startDate))–\(df.string(from: endDate))"
     }
 
     var isNow: Bool {
@@ -40,33 +40,40 @@ struct CalendarSectionView: View {
     @State private var state: CalendarState = .loading
 
     var body: some View {
-        DashboardSection(title: "SCHEDULE", subtitle: "Today", theme: theme) {
-            switch state {
-            case .loading:
-                Text("loading...")
-                    .font(.system(size: 14, design: .monospaced))
-                    .foregroundColor(theme.fgDim)
-            case .denied:
-                Text("Calendar access denied. Enable in Settings > Privacy > Calendars.")
-                    .font(.system(size: 12, design: .monospaced))
-                    .foregroundColor(theme.fgDim)
-            case .empty:
-                Text("No events today")
-                    .font(.system(size: 14, design: .monospaced))
-                    .foregroundColor(theme.fgDim)
-                    .italic()
-            case .events(let events):
-                VStack(alignment: .leading, spacing: 6) {
-                    ForEach(events) { event in
-                        eventRow(event)
+        Button {
+            if let url = URL(string: "calshow://") {
+                UIApplication.shared.open(url)
+            }
+        } label: {
+            DashboardSection(title: "SCHEDULE", subtitle: "Today", theme: theme) {
+                switch state {
+                case .loading:
+                    Text("loading...")
+                        .font(.system(size: 14, design: .monospaced))
+                        .foregroundColor(theme.fgDim)
+                case .denied:
+                    Text("Calendar access denied. Enable in Settings > Privacy > Calendars.")
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundColor(theme.fgDim)
+                case .empty:
+                    Text("No events today")
+                        .font(.system(size: 14, design: .monospaced))
+                        .foregroundColor(theme.fgDim)
+                        .italic()
+                case .events(let events):
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(events) { event in
+                            eventRow(event)
+                        }
                     }
+                case .error(let msg):
+                    Text("✗ \(msg)")
+                        .font(.system(size: 14, design: .monospaced))
+                        .foregroundColor(Sol.red)
                 }
-            case .error(let msg):
-                Text("✗ \(msg)")
-                    .font(.system(size: 14, design: .monospaced))
-                    .foregroundColor(Sol.red)
             }
         }
+        .buttonStyle(.plain)
         .task(id: refreshTrigger) {
             await loadCalendar()
         }

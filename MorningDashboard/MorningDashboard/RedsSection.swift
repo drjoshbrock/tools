@@ -98,26 +98,30 @@ struct RedsSectionView: View {
     @State private var error: String?
 
     var body: some View {
-        DashboardSection(title: "REDS", subtitle: "Cincinnati", theme: theme) {
-            if isLoading {
-                Text("loading...")
-                    .font(.system(size: 14, design: .monospaced))
-                    .foregroundColor(theme.fgDim)
-            } else if let error {
-                Text("✗ \(error)")
-                    .font(.system(size: 14, design: .monospaced))
-                    .foregroundColor(Sol.red)
-            } else if games.isEmpty {
-                Text("No games found")
-                    .font(.system(size: 14, design: .monospaced))
-                    .foregroundColor(theme.fgDim)
-                    .italic()
-            } else {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(games.enumerated()), id: \.offset) { _, game in
-                        gameView(game)
+        Group {
+            if !isLoading && error == nil && games.isEmpty {
+                EmptyView()
+            } else if let error, !isLoading {
+                DashboardSection(title: "REDS", subtitle: "Cincinnati", theme: theme) {
+                    Text("✗ \(error)")
+                        .font(.system(size: 14, design: .monospaced))
+                        .foregroundColor(Sol.red)
+                }
+            } else if !games.isEmpty {
+                Button {
+                    if let url = URL(string: "mlb://") {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    DashboardSection(title: "REDS", subtitle: "Cincinnati", theme: theme) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(Array(games.enumerated()), id: \.offset) { _, game in
+                                gameView(game)
+                            }
+                        }
                     }
                 }
+                .buttonStyle(.plain)
             }
         }
         .task(id: refreshTrigger) {
