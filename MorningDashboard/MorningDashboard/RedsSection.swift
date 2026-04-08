@@ -9,7 +9,7 @@ struct RedsSectionView: View {
 
     var body: some View {
         Button {
-            if let url = URL(string: "mlb://") {
+            if let url = URL(string: "mlbatbat://") {
                 UIApplication.shared.open(url)
             }
         } label: {

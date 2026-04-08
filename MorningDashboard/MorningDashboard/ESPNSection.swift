@@ -48,7 +48,7 @@ struct ESPNSectionView: View {
 
     var body: some View {
         Button {
-            if let url = URL(string: "espn://") {
+            if let url = URL(string: "sportscenter://") {
                 UIApplication.shared.open(url)
             }
         } label: {
