@@ -146,8 +146,6 @@
 
     <script>
     const LAT=38.40,LON=-85.61,REDS_ID=113,TZ='America/New_York';
-    // CORS proxy for iCloud/.ics feeds (deploy cors-proxy-worker.js to Cloudflare Workers)
-    const CORS_PROXY = ''; // e.g. 'https://cal-proxy.YOUR_SUBDOMAIN.workers.dev/?url='
     // ESPN team IDs
     const ESPN={
         LAKERS:'13',DOLPHINS:'15',UK_BBALL:'96',UK_FBALL:'96'
@@ -450,18 +448,12 @@
         const events = [];
         const blocks = text.split('BEGIN:VEVENT');
         for (let i = 1; i < blocks.length; i++) {
-            const raw = blocks[i].split('END:VEVENT')[0];
-            // Handle folded lines (RFC 5545: continuation lines start with space/tab)
-            const b = raw.replace(/\r?\n[ \t]/g, '');
+            const b = blocks[i].split('END:VEVENT')[0];
             const get = (key) => {
-                const m = b.match(new RegExp('^' + key + '[;:](.*)$', 'm'));
+                // Handle folded lines (RFC 5545: continuation lines start with space/tab)
+                const unfolded = b.replace(/\r?\n[ \t]/g, '');
+                const m = unfolded.match(new RegExp('^' + key + '[;:](.*)$', 'm'));
                 return m ? m[1] : null;
-            };
-            const getAll = (key) => {
-                const results = [];
-                const re = new RegExp('^' + key + '[;:](.*)$', 'gm');
-                let m; while ((m = re.exec(b)) !== null) results.push(m[1]);
-                return results;
             };
             const parseDate = (val) => {
                 if (!val) return null;
@@ -478,88 +470,9 @@
             const location = (get('LOCATION') || '').replace(/\\,/g, ',').replace(/\\n/g, ' ').replace(/\\;/g, ';');
             const start = parseDate(get('DTSTART'));
             const end = parseDate(get('DTEND'));
-            const rrule = get('RRULE');
-            // Collect EXDATE values into a Set of YYYYMMDD strings
-            const exdates = new Set();
-            for (const ex of getAll('EXDATE')) {
-                const val = ex.replace(/^.*:/, '');
-                for (const d of val.split(',')) exdates.add(d.trim().slice(0, 8));
-            }
-            if (summary && start) events.push({ summary, location, start: start.date, end: end?.date, allDay: start.allDay, rrule, exdates });
+            if (summary && start) events.push({ summary, location, start: start.date, end: end?.date, allDay: start.allDay });
         }
         return events;
-    }
-
-    /* Expand recurring events: check which ones occur today and create shifted copies */
-    function expandRecurring(events) {
-        const now = new Date();
-        const todayLocal = new Date(now.toLocaleString('en-US', { timeZone: TZ }));
-        const todayY = todayLocal.getFullYear(), todayM = todayLocal.getMonth(), todayD = todayLocal.getDate();
-        const todayYMD = `${todayY}${String(todayM+1).padStart(2,'0')}${String(todayD).padStart(2,'0')}`;
-        const todayDOW = todayLocal.getDay(); // 0=Sun
-        const DAY_MAP = { SU:0, MO:1, TU:2, WE:3, TH:4, FR:5, SA:6 };
-        const MS_DAY = 86400000;
-
-        const result = [];
-        for (const ev of events) {
-            if (!ev.rrule) { result.push(ev); continue; }
-
-            // Excluded date
-            if (ev.exdates.has(todayYMD)) continue;
-
-            // Parse RRULE parts
-            const rr = {};
-            for (const p of ev.rrule.split(';')) { const [k,v] = p.split('='); rr[k] = v; }
-            const freq = rr.FREQ, interval = parseInt(rr.INTERVAL || '1');
-
-            // Check UNTIL bound
-            if (rr.UNTIL && todayYMD > rr.UNTIL.slice(0, 8)) continue;
-
-            // Original start in local TZ
-            const orig = new Date(ev.start.toLocaleString('en-US', { timeZone: TZ }));
-            const origY = orig.getFullYear(), origM = orig.getMonth(), origD = orig.getDate();
-            const origYMD = `${origY}${String(origM+1).padStart(2,'0')}${String(origD).padStart(2,'0')}`;
-
-            // Can't occur before it started
-            if (todayYMD < origYMD) continue;
-
-            let matches = false;
-
-            if (freq === 'DAILY') {
-                const diff = Math.round((new Date(todayY,todayM,todayD) - new Date(origY,origM,origD)) / MS_DAY);
-                matches = diff >= 0 && diff % interval === 0;
-            } else if (freq === 'WEEKLY') {
-                const byDay = rr.BYDAY ? rr.BYDAY.split(',') : null;
-                const dayOK = byDay ? byDay.some(d => DAY_MAP[d] === todayDOW) : todayDOW === orig.getDay();
-                if (!dayOK) continue;
-                // Check week interval from the week containing DTSTART
-                const origWeekStart = new Date(origY, origM, origD - orig.getDay());
-                const todayWeekStart = new Date(todayY, todayM, todayD - todayDOW);
-                const diffWeeks = Math.round((todayWeekStart - origWeekStart) / (7 * MS_DAY));
-                matches = diffWeeks >= 0 && diffWeeks % interval === 0;
-            } else if (freq === 'MONTHLY') {
-                const byMD = rr.BYMONTHDAY ? parseInt(rr.BYMONTHDAY) : origD;
-                if (todayD !== byMD) continue;
-                const diffMonths = (todayY - origY) * 12 + (todayM - origM);
-                matches = diffMonths >= 0 && diffMonths % interval === 0;
-            } else if (freq === 'YEARLY') {
-                if (todayM !== origM || todayD !== origD) continue;
-                const diffYears = todayY - origY;
-                matches = diffYears >= 0 && diffYears % interval === 0;
-            }
-
-            if (!matches) continue;
-
-            // Create today's occurrence with shifted times
-            if (ev.allDay) {
-                result.push({ ...ev, start: new Date(todayY, todayM, todayD), end: new Date(todayY, todayM, todayD), rrule: null });
-            } else {
-                const todayStart = new Date(todayY, todayM, todayD, orig.getHours(), orig.getMinutes(), orig.getSeconds());
-                const todayEnd = ev.end ? new Date(todayStart.getTime() + (ev.end.getTime() - ev.start.getTime())) : null;
-                result.push({ ...ev, start: todayStart, end: todayEnd, rrule: null });
-            }
-        }
-        return result;
     }
 
     function isToday(date) {
@@ -585,14 +498,9 @@
             sec.classList.remove('hidden');
             el.innerHTML = `<div class="cal-setup">
                 <span class="none">No calendar feeds configured.</span><br><br>
-                To add iCloud calendars, edit <code>CAL_FEEDS</code> and <code>CORS_PROXY</code> in dashboard.html:<br><br>
-                <strong>1.</strong> Deploy <code>cors-proxy-worker.js</code> to Cloudflare Workers (free) and paste the URL into <code>CORS_PROXY</code><br><br>
-                <strong>2.</strong> For each iCloud calendar:<br>
-                &nbsp;&nbsp;iOS: Calendar → tap <strong>ⓘ</strong> on calendar → Public Calendar → share link<br>
-                &nbsp;&nbsp;macOS: Calendar → right-click calendar → Share Settings → Public Calendar<br><br>
-                <strong>3.</strong> Add entries to <code>CAL_FEEDS</code>:<br>
-                <code>{ name: 'Work', url: 'https://p123-caldav.icloud.com/...', color: 'var(--cyan)' }</code><br><br>
-                <strong>Outlook:</strong> outlook.com → Settings → Calendar → Shared calendars → Publish → ICS link
+                To add calendars, edit the <code>CAL_FEEDS</code> array in dashboard.html with your .ics URLs:<br><br>
+                <strong>iCloud:</strong> Calendar app → tap calendar name → Share Calendar → Public Calendar → copy URL<br><br>
+                <strong>Outlook:</strong> outlook.com → Settings → Calendar → Shared calendars → Publish → copy ICS link
             </div>`;
             return;
         }
@@ -600,12 +508,7 @@
         try {
             const allEvents = [];
             const results = await Promise.allSettled(
-                CAL_FEEDS.map(f => {
-                    // Normalize webcal:// to https:// and apply CORS proxy
-                    const url = f.url.replace(/^webcal:\/\//, 'https://');
-                    const fetchUrl = CORS_PROXY ? CORS_PROXY + encodeURIComponent(url) : url;
-                    return fetch(fetchUrl).then(r => r.text()).then(t => ({ feed: f, events: parseICS(t) }));
-                })
+                CAL_FEEDS.map(f => fetch(f.url).then(r => r.text()).then(t => ({ feed: f, events: parseICS(t) })))
             );
             for (const r of results) {
                 if (r.status === 'fulfilled') {
@@ -616,9 +519,8 @@
                     }
                 }
             }
-            // Expand recurring events to today's occurrences, then filter to today
-            const expanded = expandRecurring(allEvents);
-            const todayEvents = expanded.filter(ev => isToday(ev.start));
+            // Filter to today's events
+            const todayEvents = allEvents.filter(ev => isToday(ev.start));
             todayEvents.sort((a, b) => {
                 if (a.allDay && !b.allDay) return -1;
                 if (!a.allDay && b.allDay) return 1;
