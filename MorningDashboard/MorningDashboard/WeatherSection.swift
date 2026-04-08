@@ -161,9 +161,10 @@ struct WeatherSectionView: View {
         let minT = slice.min() ?? 0
         let maxT = slice.max() ?? 100
         let range = max(maxT - minT, 1)
+        let timeLabels: [(Int, String)] = [(0, "6a"), (3, "9a"), (6, "12p"), (9, "3p"), (12, "6p"), (15, "9p")]
 
-        VStack(alignment: .leading, spacing: 2) {
-            Text("┌─ HOURLY TEMP °F ────────────────────────────────┐")
+        VStack(alignment: .leading, spacing: 4) {
+            Text("HOURLY TEMP °F")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
 
@@ -179,14 +180,19 @@ struct WeatherSectionView: View {
             }
             .font(.system(size: 24, design: .monospaced))
             .tracking(2)
-
-            Text("6a      9a      12p     3p      6p      9p")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(theme.fgDim)
-
-            Text("└───────────────────────────────────────────────────┘")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(theme.fgDim)
+            .overlay(alignment: .bottomLeading) {
+                GeometryReader { geo in
+                    let barWidth = geo.size.width / CGFloat(slice.count)
+                    ForEach(timeLabels, id: \.0) { idx, label in
+                        Text(label)
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundColor(theme.fgDim)
+                            .position(x: barWidth * (CGFloat(idx) + 0.5),
+                                      y: geo.size.height + 10)
+                    }
+                }
+            }
+            .padding(.bottom, 16)
         }
         .padding(8)
         .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
