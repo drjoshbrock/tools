@@ -15,6 +15,7 @@
 		408BF9C52DA5C3D400A1B2C3 /* RedsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BF9B52DA5C3D400A1B2C3 /* RedsSection.swift */; };
 		408BF9C62DA5C3D400A1B2C3 /* ESPNSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BF9B62DA5C3D400A1B2C3 /* ESPNSection.swift */; };
 		408BF9C72DA5C3D400A1B2C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 408BF9B72DA5C3D400A1B2C3 /* Assets.xcassets */; };
+		408BF9C82DA5C3D400A1B2C3 /* SportsDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		408BF9B72DA5C3D400A1B2C3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		408BF9B82DA5C3D400A1B2C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		408BF9B92DA5C3D400A1B2C3 /* MorningDashboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MorningDashboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportsDataStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +69,7 @@
 				408BF9B42DA5C3D400A1B2C3 /* CalendarSection.swift */,
 				408BF9B52DA5C3D400A1B2C3 /* RedsSection.swift */,
 				408BF9B62DA5C3D400A1B2C3 /* ESPNSection.swift */,
+				408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */,
 				408BF9B72DA5C3D400A1B2C3 /* Assets.xcassets */,
 				408BF9B82DA5C3D400A1B2C3 /* Info.plist */,
 			);
@@ -149,6 +152,7 @@
 				408BF9C42DA5C3D400A1B2C3 /* CalendarSection.swift in Sources */,
 				408BF9C52DA5C3D400A1B2C3 /* RedsSection.swift in Sources */,
 				408BF9C62DA5C3D400A1B2C3 /* ESPNSection.swift in Sources */,
+				408BF9C82DA5C3D400A1B2C3 /* SportsDataStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

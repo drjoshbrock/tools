@@ -42,6 +42,7 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var refreshTrigger = 0
     @State private var refreshTime = ""
+    @State private var sportsStore = SportsDataStore()
 
     private var theme: Theme { Theme(colorScheme: colorScheme) }
 
@@ -52,12 +53,20 @@ struct ContentView: View {
 
                 WeatherSectionView(theme: theme, refreshTrigger: refreshTrigger)
                 CalendarSectionView(theme: theme, refreshTrigger: refreshTrigger)
-                RedsSectionView(theme: theme, refreshTrigger: refreshTrigger)
 
-                ESPNSectionView(config: .lakers, theme: theme, refreshTrigger: refreshTrigger)
-                ESPNSectionView(config: .dolphins, theme: theme, refreshTrigger: refreshTrigger)
-                ESPNSectionView(config: .ukBasketball, theme: theme, refreshTrigger: refreshTrigger)
-                ESPNSectionView(config: .ukFootball, theme: theme, refreshTrigger: refreshTrigger)
+                if !sportsStore.reds.games.isEmpty || sportsStore.reds.error != nil {
+                    RedsSectionView(games: sportsStore.reds.games,
+                                    error: sportsStore.reds.error, theme: theme)
+                }
+
+                ForEach([ESPNTeamConfig.lakers, .dolphins, .ukBasketball, .ukFootball],
+                        id: \.sectionTitle) { config in
+                    let result = sportsStore.espnResults[config.sectionTitle]
+                    if let result, !result.games.isEmpty || result.error != nil {
+                        ESPNSectionView(config: config, games: result.games,
+                                        error: result.error, theme: theme)
+                    }
+                }
 
                 FooterView(theme: theme, refreshTime: refreshTime) {
                     refreshTime = formattedTime()
@@ -70,6 +79,9 @@ struct ContentView: View {
         }
         .background(theme.bg)
         .onAppear { refreshTime = formattedTime() }
+        .task(id: refreshTrigger) {
+            await sportsStore.loadAll()
+        }
     }
 }
 

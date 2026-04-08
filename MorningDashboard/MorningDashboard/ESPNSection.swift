@@ -1,52 +1,5 @@
 import SwiftUI
 
-// MARK: - ESPN API Models
-
-private struct ESPNResponse: Codable {
-    let events: [ESPNEvent]?
-}
-
-private struct ESPNEvent: Codable {
-    let competitions: [ESPNCompetition]?
-}
-
-private struct ESPNCompetition: Codable {
-    let competitors: [ESPNCompetitor]?
-    let status: ESPNStatus?
-    let venue: ESPNVenue?
-    let date: String?
-    let odds: [ESPNOdds]?
-}
-
-private struct ESPNCompetitor: Codable {
-    let team: ESPNTeam
-    let score: String?
-    let homeAway: String?
-}
-
-private struct ESPNTeam: Codable {
-    let id: String
-    let abbreviation: String?
-}
-
-private struct ESPNStatus: Codable {
-    let type: ESPNStatusType?
-}
-
-private struct ESPNStatusType: Codable {
-    let completed: Bool?
-    let state: String?
-    let shortDetail: String?
-}
-
-private struct ESPNVenue: Codable {
-    let fullName: String?
-}
-
-private struct ESPNOdds: Codable {
-    let details: String?
-}
-
 // MARK: - Config
 
 struct ESPNTeamConfig {
@@ -85,27 +38,13 @@ struct ESPNTeamConfig {
     )
 }
 
-// MARK: - Internal Game Data
-
-private enum ESPNGameInfo {
-    case final_(label: String, myAbbr: String, myColor: Color, myScore: Int,
-                oppAbbr: String, oppScore: Int, venue: String, isHome: Bool)
-    case live(myAbbr: String, myColor: Color, myScore: Int,
-              oppAbbr: String, oppScore: Int, detail: String)
-    case upcoming(myAbbr: String, myColor: Color, oppAbbr: String,
-                  vs: String, time: String, venue: String, odds: String?, label: String)
-}
-
 // MARK: - View
 
 struct ESPNSectionView: View {
     let config: ESPNTeamConfig
+    let games: [ESPNGameInfo]
+    let error: String?
     let theme: Theme
-    let refreshTrigger: Int
-
-    @State private var games: [ESPNGameInfo] = []
-    @State private var isLoading = true
-    @State private var error: String?
 
     var body: some View {
         Button {
@@ -114,19 +53,10 @@ struct ESPNSectionView: View {
             }
         } label: {
             DashboardSection(title: config.sectionTitle, subtitle: config.sectionSubtitle, theme: theme) {
-                if isLoading {
-                    Text("loading...")
-                        .font(.system(size: 14, design: .monospaced))
-                        .foregroundColor(theme.fgDim)
-                } else if let error {
+                if let error {
                     Text("✗ \(error)")
                         .font(.system(size: 14, design: .monospaced))
                         .foregroundColor(Sol.red)
-                } else if games.isEmpty {
-                    Text("No games found")
-                        .font(.system(size: 14, design: .monospaced))
-                        .foregroundColor(theme.fgDim)
-                        .italic()
                 } else {
                     VStack(alignment: .leading, spacing: 0) {
                         ForEach(Array(games.enumerated()), id: \.offset) { _, game in
@@ -137,9 +67,6 @@ struct ESPNSectionView: View {
             }
         }
         .buttonStyle(.plain)
-        .task(id: refreshTrigger) {
-            await loadData()
-        }
     }
 
     @ViewBuilder
@@ -199,164 +126,4 @@ struct ESPNSectionView: View {
             }
         }
     }
-
-    // MARK: - Data Loading
-
-    private func loadData() async {
-        switch config.mode {
-        case .daily:
-            await loadDaily()
-        case .weekly:
-            await loadWeekly()
-        }
-    }
-
-    private func loadDaily() async {
-        let yDate = yesterdayString().replacingOccurrences(of: "-", with: "")
-        let tDate = todayString().replacingOccurrences(of: "-", with: "")
-        let base = "https://site.api.espn.com/apis/site/v2/sports/\(config.sport)/\(config.league)/scoreboard"
-
-        do {
-            async let yData = URLSession.shared.data(from: URL(string: "\(base)?dates=\(yDate)")!)
-            async let tData = URLSession.shared.data(from: URL(string: "\(base)?dates=\(tDate)")!)
-
-            let (yBytes, _) = try await yData
-            let (tBytes, _) = try await tData
-
-            let yResp = try JSONDecoder().decode(ESPNResponse.self, from: yBytes)
-            let tResp = try JSONDecoder().decode(ESPNResponse.self, from: tBytes)
-
-            var result: [ESPNGameInfo] = []
-
-            if let comp = findTeamGame(in: yResp, teamId: config.teamId),
-               let info = buildGameInfo(comp, label: "YESTERDAY") {
-                result.append(info)
-            }
-            if let comp = findTeamGame(in: tResp, teamId: config.teamId),
-               let info = buildGameInfo(comp, label: "TODAY") {
-                result.append(info)
-            }
-
-            games = result
-            isLoading = false
-            self.error = nil
-        } catch {
-            isLoading = false
-            self.error = error.localizedDescription
-        }
-    }
-
-    private func loadWeekly() async {
-        let startDate = dateOffsetString(days: -7)
-        let endDate = dateOffsetString(days: 7)
-        let url = "https://site.api.espn.com/apis/site/v2/sports/\(config.sport)/\(config.league)/scoreboard?dates=\(startDate)-\(endDate)"
-
-        do {
-            let (data, _) = try await URLSession.shared.data(from: URL(string: url)!)
-            let resp = try JSONDecoder().decode(ESPNResponse.self, from: data)
-
-            var pastGames: [(comp: ESPNCompetition, date: Date)] = []
-            var futureGames: [(comp: ESPNCompetition, date: Date)] = []
-
-            for event in resp.events ?? [] {
-                guard let comp = event.competitions?.first,
-                      let competitors = comp.competitors,
-                      competitors.contains(where: { $0.team.id == config.teamId }) else { continue }
-
-                let gameDate = parseISO8601(comp.date ?? "")
-                let st = comp.status?.type
-
-                if st?.completed == true {
-                    pastGames.append((comp, gameDate))
-                } else if st?.state == "in" {
-                    futureGames.insert((comp, gameDate), at: 0)
-                } else {
-                    futureGames.append((comp, gameDate))
-                }
-            }
-
-            pastGames.sort { $0.date > $1.date }
-            futureGames.sort { $0.date < $1.date }
-
-            var result: [ESPNGameInfo] = []
-            let now = Date()
-
-            if let pg = pastGames.first {
-                let daysAgo = Int(round(now.timeIntervalSince(pg.date) / 86400))
-                let label = daysAgo <= 1 ? "YESTERDAY" : "\(daysAgo) DAYS AGO"
-                if let info = buildGameInfo(pg.comp, label: label) {
-                    result.append(info)
-                }
-            }
-
-            if let fg = futureGames.first {
-                let st = fg.comp.status?.type
-                let label: String
-                if st?.state == "in" {
-                    label = "LIVE"
-                } else {
-                    let df = DateFormatter()
-                    df.timeZone = DashboardConfig.tz
-                    df.dateFormat = "EEE MMM d"
-                    label = df.string(from: fg.date).uppercased()
-                }
-                if let info = buildGameInfo(fg.comp, label: label) {
-                    result.append(info)
-                }
-            }
-
-            games = result
-            isLoading = false
-        } catch {
-            isLoading = false
-        }
-    }
-
-    private func findTeamGame(in response: ESPNResponse, teamId: String) -> ESPNCompetition? {
-        for event in response.events ?? [] {
-            if let comp = event.competitions?.first,
-               let competitors = comp.competitors,
-               competitors.contains(where: { $0.team.id == teamId }) {
-                return comp
-            }
-        }
-        return nil
-    }
-
-    private func buildGameInfo(_ comp: ESPNCompetition, label: String) -> ESPNGameInfo? {
-        guard let competitors = comp.competitors,
-              let my = competitors.first(where: { $0.team.id == config.teamId }),
-              let opp = competitors.first(where: { $0.team.id != config.teamId }) else {
-            return nil
-        }
-        let oppA = opp.team.abbreviation ?? "OPP"
-        let st = comp.status?.type
-        let isHome = my.homeAway == "home"
-        let venue = comp.venue?.fullName ?? ""
-
-        if st?.completed == true {
-            let myS = Int(my.score ?? "0") ?? 0
-            let oppS = Int(opp.score ?? "0") ?? 0
-            return .final_(label: label, myAbbr: config.teamAbbr, myColor: config.teamColor,
-                           myScore: myS, oppAbbr: oppA, oppScore: oppS, venue: venue, isHome: isHome)
-        } else if st?.state == "in" {
-            let myS = Int(my.score ?? "0") ?? 0
-            let oppS = Int(opp.score ?? "0") ?? 0
-            return .live(myAbbr: config.teamAbbr, myColor: config.teamColor,
-                         myScore: myS, oppAbbr: oppA, oppScore: oppS,
-                         detail: st?.shortDetail ?? "")
-        } else {
-            let vs = isHome ? "vs" : "@"
-            let gameDate = parseISO8601(comp.date ?? "")
-            let timeFmt = DateFormatter()
-            timeFmt.timeZone = DashboardConfig.tz
-            timeFmt.dateFormat = "h:mm a"
-            let time = timeFmt.string(from: gameDate) + " ET"
-            let odds = comp.odds?.first?.details
-            return .upcoming(myAbbr: config.teamAbbr, myColor: config.teamColor,
-                             oppAbbr: oppA, vs: vs, time: time, venue: venue,
-                             odds: odds, label: "UPCOMING")
-        }
-    }
 }
-
