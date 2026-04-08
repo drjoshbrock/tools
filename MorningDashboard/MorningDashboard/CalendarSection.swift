@@ -15,8 +15,8 @@ private struct CalendarEvent: Identifiable {
         df.dateFormat = "h:mm a"
         let start = df.string(from: startDate)
         let end = df.string(from: endDate)
-        let cleanStart = start.replacingOccurrences(of: ":00", with: "")
-        let cleanEnd = end.replacingOccurrences(of: ":00", with: "")
+        let cleanStart = start.replacingOccurrences(of: ":00", with: "").replacingOccurrences(of: " ", with: "")
+        let cleanEnd = end.replacingOccurrences(of: ":00", with: "").replacingOccurrences(of: " ", with: "")
         return "\(cleanStart)–\(cleanEnd)"
     }
 
