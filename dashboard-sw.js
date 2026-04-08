@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dashboard-v5';
+const CACHE_NAME = 'dashboard-v6';
 const ASSETS = [
   'dashboard.html',
   'dashboard-manifest.json'
@@ -24,8 +24,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // API calls: always go to network
-  if (url.hostname === 'api.open-meteo.com' || url.hostname === 'statsapi.mlb.com' || url.hostname === 'site.api.espn.com') {
+  // API + calendar proxy calls: always go to network
+  if (url.hostname === 'api.open-meteo.com' || url.hostname === 'statsapi.mlb.com' || url.hostname === 'site.api.espn.com' || url.hostname.endsWith('.workers.dev') || url.hostname.endsWith('caldav.icloud.com')) {
     event.respondWith(fetch(event.request));
     return;
   }
