@@ -106,7 +106,7 @@ struct CalendarSectionView: View {
                 }
             }
             .font(.system(size: 14, design: .monospaced))
-            .lineLimit(1)
+            .lineLimit(2)
 
             Spacer(minLength: 0)
         }
