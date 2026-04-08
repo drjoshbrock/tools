@@ -163,11 +163,11 @@ struct WeatherSectionView: View {
         let range = max(maxT - minT, 1)
 
         VStack(alignment: .leading, spacing: 2) {
-            Text("┌─ HOURLY TEMP °F ─────────────────────────────────────┐")
+            Text("┌─ HOURLY TEMP °F ────────────────────────────────┐")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
 
-            HStack(spacing: 2) {
+            HStack(spacing: 1) {
                 ForEach(0..<slice.count, id: \.self) { i in
                     let t = slice[i]
                     let norm = (t - minT) / range
@@ -177,14 +177,14 @@ struct WeatherSectionView: View {
                         .foregroundColor(color)
                 }
             }
-            .font(.system(size: 26, design: .monospaced))
-            .tracking(3)
+            .font(.system(size: 24, design: .monospaced))
+            .tracking(2)
 
-            Text("6a       9a       12p      3p       6p       9p")
+            Text("6a      9a      12p     3p      6p      9p")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
 
-            Text("└────────────────────────────────────────────────────────┘")
+            Text("└───────────────────────────────────────────────────┘")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
         }

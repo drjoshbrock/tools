@@ -13,7 +13,11 @@ private struct CalendarEvent: Identifiable {
         if isAllDay { return "ALL DAY" }
         let df = DateFormatter()
         df.dateFormat = "h:mm a"
-        return "\(df.string(from: startDate))–\(df.string(from: endDate))"
+        let start = df.string(from: startDate)
+        let end = df.string(from: endDate)
+        let cleanStart = start.replacingOccurrences(of: ":00", with: "")
+        let cleanEnd = end.replacingOccurrences(of: ":00", with: "")
+        return "\(cleanStart)–\(cleanEnd)"
     }
 
     var isNow: Bool {

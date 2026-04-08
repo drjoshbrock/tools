@@ -131,13 +131,13 @@ struct DashboardSection<Content: View>: View {
 
             HStack {
                 Text(title)
-                    .font(.system(size: 13, design: .monospaced))
+                    .font(.system(size: 17, design: .monospaced))
                     .fontWeight(.bold)
                     .foregroundColor(Sol.blue)
                     .tracking(1)
                 Spacer()
                 Text(subtitle)
-                    .font(.system(size: 13, design: .monospaced))
+                    .font(.system(size: 14, design: .monospaced))
                     .foregroundColor(theme.fgDim)
             }
             .padding(.horizontal, 14)
