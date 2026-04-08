@@ -11,9 +11,9 @@ private struct MLBDateEntry: Codable {
 }
 
 private struct MLBGame: Codable {
-    let gameDate: String
+    let gameDate: String?
     let status: MLBGameStatus?
-    let teams: MLBTeamsPair
+    let teams: MLBTeamsPair?
     let venue: MLBVenue?
     let decisions: MLBDecisions?
     let linescore: MLBLinescore?
@@ -255,10 +255,11 @@ struct RedsSectionView: View {
     }
 
     private func processGame(_ game: MLBGame, label: String, redsId: Int) -> RedsGameType? {
+        guard let teams = game.teams else { return nil }
         let state = game.status?.detailedState ?? ""
-        let isHome = game.teams.home.team.id == redsId
-        let reds = isHome ? game.teams.home : game.teams.away
-        let opp = isHome ? game.teams.away : game.teams.home
+        let isHome = teams.home.team.id == redsId
+        let reds = isHome ? teams.home : teams.away
+        let opp = isHome ? teams.away : teams.home
         let oppA = mlbAbbr(opp.team.name)
 
         if state.hasPrefix("Final") || state == "Game Over" {
@@ -283,14 +284,14 @@ struct RedsSectionView: View {
                 detail: inning.trimmingCharacters(in: .whitespaces)
             )
         } else {
-            let gameDate = parseISO8601(game.gameDate)
+            let gameDate = parseISO8601(game.gameDate ?? "")
             let timeFmt = DateFormatter()
             timeFmt.timeZone = DashboardConfig.tz
             timeFmt.dateFormat = "h:mm a"
             let timeStr = timeFmt.string(from: gameDate) + " ET"
             let vs = isHome ? "vs" : "@"
-            let rP = isHome ? game.teams.home.probablePitcher : game.teams.away.probablePitcher
-            let oP = isHome ? game.teams.away.probablePitcher : game.teams.home.probablePitcher
+            let rP = isHome ? teams.home.probablePitcher : teams.away.probablePitcher
+            let oP = isHome ? teams.away.probablePitcher : teams.home.probablePitcher
             return .upcoming(
                 oppAbbr: oppA,
                 vs: vs,

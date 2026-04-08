@@ -11,7 +11,7 @@ private struct ESPNEvent: Codable {
 }
 
 private struct ESPNCompetition: Codable {
-    let competitors: [ESPNCompetitor]
+    let competitors: [ESPNCompetitor]?
     let status: ESPNStatus?
     let venue: ESPNVenue?
     let date: String
@@ -105,14 +105,21 @@ struct ESPNSectionView: View {
 
     @State private var games: [ESPNGameInfo] = []
     @State private var hasData = false
+    @State private var error: String?
 
     var body: some View {
         Group {
             if hasData {
                 DashboardSection(title: config.sectionTitle, subtitle: config.sectionSubtitle, theme: theme) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(Array(games.enumerated()), id: \.offset) { _, game in
-                            espnGameView(game)
+                    if let error {
+                        Text("✗ \(error)")
+                            .font(.system(size: 14, design: .monospaced))
+                            .foregroundColor(Sol.red)
+                    } else {
+                        VStack(alignment: .leading, spacing: 0) {
+                            ForEach(Array(games.enumerated()), id: \.offset) { _, game in
+                                espnGameView(game)
+                            }
                         }
                     }
                 }
@@ -209,17 +216,21 @@ struct ESPNSectionView: View {
 
             var result: [ESPNGameInfo] = []
 
-            if let comp = findTeamGame(in: yResp, teamId: config.teamId) {
-                result.append(buildGameInfo(comp, label: "YESTERDAY"))
+            if let comp = findTeamGame(in: yResp, teamId: config.teamId),
+               let info = buildGameInfo(comp, label: "YESTERDAY") {
+                result.append(info)
             }
-            if let comp = findTeamGame(in: tResp, teamId: config.teamId) {
-                result.append(buildGameInfo(comp, label: "TODAY"))
+            if let comp = findTeamGame(in: tResp, teamId: config.teamId),
+               let info = buildGameInfo(comp, label: "TODAY") {
+                result.append(info)
             }
 
             games = result
             hasData = !result.isEmpty
+            self.error = nil
         } catch {
-            hasData = false
+            hasData = true
+            self.error = error.localizedDescription
         }
     }
 
@@ -237,7 +248,8 @@ struct ESPNSectionView: View {
 
             for event in resp.events ?? [] {
                 guard let comp = event.competitions?.first,
-                      comp.competitors.contains(where: { $0.team.id == config.teamId }) else { continue }
+                      let competitors = comp.competitors,
+                      competitors.contains(where: { $0.team.id == config.teamId }) else { continue }
 
                 let gameDate = parseISO8601(comp.date)
                 let st = comp.status?.type
@@ -260,19 +272,24 @@ struct ESPNSectionView: View {
             if let pg = pastGames.first {
                 let daysAgo = Int(round(now.timeIntervalSince(pg.date) / 86400))
                 let label = daysAgo <= 1 ? "YESTERDAY" : "\(daysAgo) DAYS AGO"
-                result.append(buildGameInfo(pg.comp, label: label))
+                if let info = buildGameInfo(pg.comp, label: label) {
+                    result.append(info)
+                }
             }
 
             if let fg = futureGames.first {
                 let st = fg.comp.status?.type
+                let label: String
                 if st?.state == "in" {
-                    result.append(buildGameInfo(fg.comp, label: "LIVE"))
+                    label = "LIVE"
                 } else {
                     let df = DateFormatter()
                     df.timeZone = DashboardConfig.tz
                     df.dateFormat = "EEE MMM d"
-                    let label = df.string(from: fg.date).uppercased()
-                    result.append(buildGameInfo(fg.comp, label: label))
+                    label = df.string(from: fg.date).uppercased()
+                }
+                if let info = buildGameInfo(fg.comp, label: label) {
+                    result.append(info)
                 }
             }
 
@@ -286,16 +303,20 @@ struct ESPNSectionView: View {
     private func findTeamGame(in response: ESPNResponse, teamId: String) -> ESPNCompetition? {
         for event in response.events ?? [] {
             if let comp = event.competitions?.first,
-               comp.competitors.contains(where: { $0.team.id == teamId }) {
+               let competitors = comp.competitors,
+               competitors.contains(where: { $0.team.id == teamId }) {
                 return comp
             }
         }
         return nil
     }
 
-    private func buildGameInfo(_ comp: ESPNCompetition, label: String) -> ESPNGameInfo {
-        let my = comp.competitors.first(where: { $0.team.id == config.teamId })!
-        let opp = comp.competitors.first(where: { $0.team.id != config.teamId })!
+    private func buildGameInfo(_ comp: ESPNCompetition, label: String) -> ESPNGameInfo? {
+        guard let competitors = comp.competitors,
+              let my = competitors.first(where: { $0.team.id == config.teamId }),
+              let opp = competitors.first(where: { $0.team.id != config.teamId }) else {
+            return nil
+        }
         let oppA = opp.team.abbreviation ?? "OPP"
         let st = comp.status?.type
         let isHome = my.homeAway == "home"
