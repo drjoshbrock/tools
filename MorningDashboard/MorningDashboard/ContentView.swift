@@ -79,15 +79,21 @@ struct TitleBarView: View {
     let theme: Theme
     let refreshTrigger: Int
 
-    var body: some View {
-        let now = Date()
+    private var dateStr: String {
         let df = DateFormatter()
         df.timeZone = DashboardConfig.tz
         df.dateFormat = "EEE MMM d"
-        let dateStr = df.string(from: now)
-        df.dateFormat = "h:mm a"
-        let timeStr = df.string(from: now)
+        return df.string(from: Date())
+    }
 
+    private var timeStr: String {
+        let df = DateFormatter()
+        df.timeZone = DashboardConfig.tz
+        df.dateFormat = "h:mm a"
+        return df.string(from: Date())
+    }
+
+    var body: some View {
         HStack {
             (Text("▸").foregroundColor(Sol.cyan) +
              Text(" morning-dashboard").foregroundColor(Sol.green))
