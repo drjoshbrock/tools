@@ -157,46 +157,51 @@ class SportsDataStore {
     var reds = SportsResult<RedsGameType>()
     var espnResults: [String: SportsResult<ESPNGameInfo>] = [:]
 
-    func loadAll() async {
+    func loadAll(mode: DashboardModeType = .morning) async {
         await withTaskGroup(of: Void.self) { group in
-            group.addTask { await self.loadReds() }
-            group.addTask { await self.loadESPN(.lakers) }
-            group.addTask { await self.loadESPN(.dolphins) }
-            group.addTask { await self.loadESPN(.ukBasketball) }
-            group.addTask { await self.loadESPN(.ukFootball) }
+            group.addTask { await self.loadReds(mode: mode) }
+            group.addTask { await self.loadESPN(.lakers, mode: mode) }
+            group.addTask { await self.loadESPN(.dolphins, mode: mode) }
+            group.addTask { await self.loadESPN(.ukBasketball, mode: mode) }
+            group.addTask { await self.loadESPN(.ukFootball, mode: mode) }
         }
     }
 
     // MARK: - Reds Loading
 
-    private func loadReds() async {
+    private func loadReds(mode: DashboardModeType) async {
         let redsId = DashboardConfig.redsId
-        let yesterday = yesterdayString()
-        let today = todayString()
+        let isEvening = mode == .evening
+
+        // Morning: yesterday + today. Evening: today + tomorrow.
+        let date1 = isEvening ? todayString() : yesterdayString()
+        let date2 = isEvening ? tomorrowString() : todayString()
+        let label1 = isEvening ? "TODAY" : "YESTERDAY"
+        let label2 = isEvening ? "TOMORROW" : "TODAY"
 
         do {
-            let yUrl = "https://statsapi.mlb.com/api/v1/schedule?teamId=\(redsId)&date=\(yesterday)&sportId=1&hydrate=probablePitcher,linescore,decisions,team"
-            let tUrl = "https://statsapi.mlb.com/api/v1/schedule?teamId=\(redsId)&date=\(today)&sportId=1&hydrate=probablePitcher,linescore,decisions,team"
+            let url1 = "https://statsapi.mlb.com/api/v1/schedule?teamId=\(redsId)&date=\(date1)&sportId=1&hydrate=probablePitcher,linescore,decisions,team"
+            let url2 = "https://statsapi.mlb.com/api/v1/schedule?teamId=\(redsId)&date=\(date2)&sportId=1&hydrate=probablePitcher,linescore,decisions,team"
 
-            async let yData = URLSession.shared.data(from: URL(string: yUrl)!)
-            async let tData = URLSession.shared.data(from: URL(string: tUrl)!)
+            async let data1 = URLSession.shared.data(from: URL(string: url1)!)
+            async let data2 = URLSession.shared.data(from: URL(string: url2)!)
 
-            let (yBytes, _) = try await yData
-            let (tBytes, _) = try await tData
+            let (bytes1, _) = try await data1
+            let (bytes2, _) = try await data2
 
-            let yResp = try JSONDecoder().decode(MLBResponse.self, from: yBytes)
-            let tResp = try JSONDecoder().decode(MLBResponse.self, from: tBytes)
+            let resp1 = try JSONDecoder().decode(MLBResponse.self, from: bytes1)
+            let resp2 = try JSONDecoder().decode(MLBResponse.self, from: bytes2)
 
             var result: [RedsGameType] = []
 
-            if let yGame = yResp.dates?.first?.games?.first {
-                if let gt = processMLBGame(yGame, label: "YESTERDAY", redsId: redsId) {
+            if let game1 = resp1.dates?.first?.games?.first {
+                if let gt = processMLBGame(game1, label: label1, redsId: redsId) {
                     result.append(gt)
                 }
             }
 
-            if let tGame = tResp.dates?.first?.games?.first {
-                if let gt = processMLBGame(tGame, label: "TODAY", redsId: redsId) {
+            if let game2 = resp2.dates?.first?.games?.first {
+                if let gt = processMLBGame(game2, label: label2, redsId: redsId) {
                     result.append(gt)
                 }
             }
@@ -259,39 +264,43 @@ class SportsDataStore {
 
     // MARK: - ESPN Loading
 
-    private func loadESPN(_ config: ESPNTeamConfig) async {
+    private func loadESPN(_ config: ESPNTeamConfig, mode: DashboardModeType = .morning) async {
         let key = config.sectionTitle
         switch config.mode {
         case .daily:
-            await loadESPNDaily(config, key: key)
+            await loadESPNDaily(config, key: key, mode: mode)
         case .weekly:
             await loadESPNWeekly(config, key: key)
         }
     }
 
-    private func loadESPNDaily(_ config: ESPNTeamConfig, key: String) async {
-        let yDate = yesterdayString().replacingOccurrences(of: "-", with: "")
-        let tDate = todayString().replacingOccurrences(of: "-", with: "")
+    private func loadESPNDaily(_ config: ESPNTeamConfig, key: String, mode: DashboardModeType) async {
+        let isEvening = mode == .evening
+        // Morning: yesterday + today. Evening: today + tomorrow.
+        let date1Str = isEvening ? todayString().replacingOccurrences(of: "-", with: "") : yesterdayString().replacingOccurrences(of: "-", with: "")
+        let date2Str = isEvening ? tomorrowString().replacingOccurrences(of: "-", with: "") : todayString().replacingOccurrences(of: "-", with: "")
+        let label1 = isEvening ? "TODAY" : "YESTERDAY"
+        let label2 = isEvening ? "TOMORROW" : "TODAY"
         let base = "https://site.api.espn.com/apis/site/v2/sports/\(config.sport)/\(config.league)/scoreboard"
 
         do {
-            async let yData = URLSession.shared.data(from: URL(string: "\(base)?dates=\(yDate)")!)
-            async let tData = URLSession.shared.data(from: URL(string: "\(base)?dates=\(tDate)")!)
+            async let data1 = URLSession.shared.data(from: URL(string: "\(base)?dates=\(date1Str)")!)
+            async let data2 = URLSession.shared.data(from: URL(string: "\(base)?dates=\(date2Str)")!)
 
-            let (yBytes, _) = try await yData
-            let (tBytes, _) = try await tData
+            let (bytes1, _) = try await data1
+            let (bytes2, _) = try await data2
 
-            let yResp = try JSONDecoder().decode(ESPNResponse.self, from: yBytes)
-            let tResp = try JSONDecoder().decode(ESPNResponse.self, from: tBytes)
+            let resp1 = try JSONDecoder().decode(ESPNResponse.self, from: bytes1)
+            let resp2 = try JSONDecoder().decode(ESPNResponse.self, from: bytes2)
 
             var result: [ESPNGameInfo] = []
 
-            if let comp = findTeamGame(in: yResp, teamId: config.teamId),
-               let info = buildGameInfo(comp, config: config, label: "YESTERDAY") {
+            if let comp = findTeamGame(in: resp1, teamId: config.teamId),
+               let info = buildGameInfo(comp, config: config, label: label1) {
                 result.append(info)
             }
-            if let comp = findTeamGame(in: tResp, teamId: config.teamId),
-               let info = buildGameInfo(comp, config: config, label: "TODAY") {
+            if let comp = findTeamGame(in: resp2, teamId: config.teamId),
+               let info = buildGameInfo(comp, config: config, label: label2) {
                 result.append(info)
             }
 

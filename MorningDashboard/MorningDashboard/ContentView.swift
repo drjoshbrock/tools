@@ -21,6 +21,13 @@ func yesterdayString() -> String {
     return df.string(from: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
 }
 
+func tomorrowString() -> String {
+    let df = DateFormatter()
+    df.timeZone = DashboardConfig.tz
+    df.dateFormat = "yyyy-MM-dd"
+    return df.string(from: Calendar.current.date(byAdding: .day, value: 1, to: Date())!)
+}
+
 func dateOffsetString(days: Int) -> String {
     let df = DateFormatter()
     df.timeZone = DashboardConfig.tz
@@ -40,6 +47,8 @@ func parseISO8601(_ string: String) -> Date {
 
 struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(DashboardMode.self) private var dashboardMode
     @State private var refreshTrigger = 0
     @State private var refreshTime = ""
     @State private var sportsStore = SportsDataStore()
@@ -77,11 +86,41 @@ struct ContentView: View {
             .frame(maxWidth: 500)
             .frame(maxWidth: .infinity)
         }
+        .safeAreaInset(edge: .bottom) {
+            modeToggleBar
+        }
         .background(theme.bg)
         .onAppear { refreshTime = formattedTime() }
-        .task(id: refreshTrigger) {
-            await sportsStore.loadAll()
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                dashboardMode.resetToAuto()
+                refreshTime = formattedTime()
+                refreshTrigger += 1
+            }
         }
+        .task(id: refreshTrigger) {
+            await sportsStore.loadAll(mode: dashboardMode.activeMode)
+        }
+    }
+
+    private var modeToggleBar: some View {
+        Button {
+            dashboardMode.toggle()
+            refreshTrigger += 1
+        } label: {
+            HStack {
+                Spacer()
+                Text("[ switch to \(dashboardMode.otherModeLabel) ]")
+                    .font(.system(size: 13, design: .monospaced))
+                    .foregroundColor(Sol.cyan)
+                    .tracking(0.5)
+                Spacer()
+            }
+            .padding(.vertical, 10)
+            .background(theme.bgHighlight)
+            .overlay(Rectangle().fill(theme.border).frame(height: 1), alignment: .top)
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -90,17 +129,18 @@ struct ContentView: View {
 struct TitleBarView: View {
     let theme: Theme
     let refreshTrigger: Int
+    @Environment(DashboardMode.self) private var dashboardMode
 
     private var dateStr: String {
         let df = DateFormatter()
         df.timeZone = DashboardConfig.tz
         df.dateFormat = "EEEE, MMMM d"
-        return df.string(from: Date()).uppercased()
+        return df.string(from: dashboardMode.targetDate).uppercased()
     }
 
     var body: some View {
         VStack(spacing: 4) {
-            Text("GOOD MORNING")
+            Text(dashboardMode.greeting)
                 .font(.system(size: 22, design: .monospaced))
                 .fontWeight(.bold)
                 .foregroundColor(Sol.orange)

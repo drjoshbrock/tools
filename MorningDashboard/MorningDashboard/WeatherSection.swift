@@ -50,6 +50,7 @@ private let wmoIcons: [Int: String] = [
 struct WeatherSectionView: View {
     let theme: Theme
     let refreshTrigger: Int
+    @Environment(DashboardMode.self) private var dashboardMode
 
     @State private var hi = 0
     @State private var lo = 0
@@ -201,18 +202,33 @@ struct WeatherSectionView: View {
     private func loadWeather() async {
         isLoading = true
         error = nil
+        let isEvening = dashboardMode.activeMode == .evening
         do {
-            let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(DashboardConfig.lat)&longitude=\(DashboardConfig.lon)&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=precipitation_probability,temperature_2m&temperature_unit=fahrenheit&timezone=America/New_York&forecast_days=1"
+            let forecastDays = isEvening ? 2 : 1
+            let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(DashboardConfig.lat)&longitude=\(DashboardConfig.lon)&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=precipitation_probability,temperature_2m&temperature_unit=fahrenheit&timezone=America/New_York&forecast_days=\(forecastDays)"
             let (data, _) = try await URLSession.shared.data(from: URL(string: urlStr)!)
             let resp = try JSONDecoder().decode(WeatherResponse.self, from: data)
-            hi = Int(resp.daily.temperature_2m_max[0].rounded())
-            lo = Int(resp.daily.temperature_2m_min[0].rounded())
-            let code = resp.daily.weathercode[0]
+            let dayIdx = isEvening ? 1 : 0
+            hi = Int(resp.daily.temperature_2m_max[dayIdx].rounded())
+            lo = Int(resp.daily.temperature_2m_min[dayIdx].rounded())
+            let code = resp.daily.weathercode[dayIdx]
             condition = wmoConditions[code] ?? "Unknown"
             icon = wmoIcons[code] ?? "?"
-            rainMax = resp.daily.precipitation_probability_max[0]
-            hourlyRain = resp.hourly.precipitation_probability
-            hourlyTemp = resp.hourly.temperature_2m
+            rainMax = resp.daily.precipitation_probability_max[dayIdx]
+            // Hourly data: each day has 24 hours. In evening mode, use hours 24-47 (tomorrow).
+            let hourlyOffset = isEvening ? 24 : 0
+            let allRain = resp.hourly.precipitation_probability
+            let allTemp = resp.hourly.temperature_2m
+            if allRain.count >= hourlyOffset + 24 {
+                hourlyRain = Array(allRain[hourlyOffset..<hourlyOffset + 24])
+            } else {
+                hourlyRain = allRain
+            }
+            if allTemp.count >= hourlyOffset + 24 {
+                hourlyTemp = Array(allTemp[hourlyOffset..<hourlyOffset + 24])
+            } else {
+                hourlyTemp = allTemp
+            }
         } catch {
             self.error = error.localizedDescription
         }

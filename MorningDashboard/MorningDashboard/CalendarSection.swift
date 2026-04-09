@@ -40,6 +40,7 @@ private enum CalendarState {
 struct CalendarSectionView: View {
     let theme: Theme
     let refreshTrigger: Int
+    @Environment(DashboardMode.self) private var dashboardMode
 
     @State private var state: CalendarState = .loading
 
@@ -49,7 +50,7 @@ struct CalendarSectionView: View {
                 UIApplication.shared.open(url)
             }
         } label: {
-            DashboardSection(title: "SCHEDULE", subtitle: "Today", theme: theme) {
+            DashboardSection(title: "SCHEDULE", subtitle: dashboardMode.calendarSubtitle, theme: theme) {
                 switch state {
                 case .loading:
                     Text("loading...")
@@ -60,7 +61,7 @@ struct CalendarSectionView: View {
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundColor(theme.fgDim)
                 case .empty:
-                    Text("No events today")
+                    Text(dashboardMode.activeMode == .morning ? "No events today" : "No events tomorrow")
                         .font(.system(size: 14, design: .monospaced))
                         .foregroundColor(theme.fgDim)
                         .italic()
@@ -130,7 +131,8 @@ struct CalendarSectionView: View {
         }
 
         let cal = Calendar.current
-        let startOfDay = cal.startOfDay(for: Date())
+        let baseDate = dashboardMode.targetDate
+        let startOfDay = cal.startOfDay(for: baseDate)
         guard let endOfDay = cal.date(byAdding: .day, value: 1, to: startOfDay) else {
             state = .error("Could not compute end of day")
             return
