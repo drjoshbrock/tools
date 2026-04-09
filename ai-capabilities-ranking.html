@@ -93,6 +93,11 @@
             font-size: 0.85rem;
             color: #666;
         }
+        header .attribution a {
+            color: #818cf8;
+            text-decoration: none;
+        }
+        header .attribution a:hover { text-decoration: underline; }
 
         .tier {
             margin-bottom: 2rem;
@@ -121,19 +126,6 @@
             font-size: 1.5rem;
             font-weight: 900;
             flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
-        }
-        .tier-badge::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 14px;
-            padding: 2px;
-            background: inherit;
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
         }
 
         .tier-s .tier-badge { background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706); color: #000; box-shadow: 0 0 30px rgba(251,191,36,0.3); }
@@ -192,13 +184,14 @@
         .logo-google { background: linear-gradient(135deg, #4285f4, #3367d6); color: #fff; }
         .logo-xai { background: linear-gradient(135deg, #1d9bf0, #0c7abf); color: #fff; }
         .logo-meta { background: linear-gradient(135deg, #0668E1, #0553b8); color: #fff; }
-        .logo-zai { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; }
-        .logo-deepseek { background: linear-gradient(135deg, #536DFE, #3d5afe); color: #fff; }
         .logo-alibaba { background: linear-gradient(135deg, #ff6a00, #e05d00); color: #fff; }
+        .logo-moonshot { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; }
         .logo-minimax { background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: #fff; }
+        .logo-xiaomi { background: linear-gradient(135deg, #ff6900, #e05e00); color: #fff; }
+        .logo-deepseek { background: linear-gradient(135deg, #536DFE, #3d5afe); color: #fff; }
+        .logo-zai { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; }
         .logo-mistral { background: linear-gradient(135deg, #ff7000, #e06300); color: #fff; }
-        .logo-cohere { background: linear-gradient(135deg, #39594D, #2d4a3e); color: #fff; }
-        .logo-ai21 { background: linear-gradient(135deg, #6c5ce7, #5a4bd1); color: #fff; }
+        .logo-other { background: linear-gradient(135deg, #4a5568, #2d3748); color: #fff; }
 
         .card-top .company-name {
             font-size: 1rem;
@@ -238,9 +231,11 @@
         }
         .stat-chip .stat-value { color: #fff; font-weight: 700; }
 
-        .tier-s .stat-chip { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.15); }
-        .tier-a .stat-chip { background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.15); }
-        .tier-b .stat-chip { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.15); }
+        .stat-chip.chip-frontier { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.2); color: #fbbf24; }
+        .stat-chip.chip-fallen { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #f87171; }
+        .stat-chip.chip-returning { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.2); color: #a78bfa; }
+        .stat-chip.chip-behind { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.2); color: #34d399; }
+        .stat-chip.chip-warning { background: rgba(251,146,60,0.1); border-color: rgba(251,146,60,0.2); color: #fb923c; }
 
         .quote-block {
             margin: 2rem 0;
@@ -314,7 +309,7 @@
             margin-bottom: 0.75rem;
         }
         .bar-label {
-            width: 180px;
+            width: 140px;
             font-size: 0.85rem;
             font-weight: 600;
             color: #ccc;
@@ -342,12 +337,35 @@
             transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
             width: 0;
         }
-        .bar-fill.loaded { /* set by JS */ }
 
         .bar-fill.bar-s { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
         .bar-fill.bar-a { background: linear-gradient(90deg, #a78bfa, #8b5cf6); }
         .bar-fill.bar-b { background: linear-gradient(90deg, #34d399, #10b981); }
         .bar-fill.bar-c { background: linear-gradient(90deg, #94a3b8, #64748b); color: #fff; }
+
+        .tier-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.25rem 0;
+            padding-left: 152px;
+        }
+        .tier-divider span {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+        .tier-divider .line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+        .tier-divider.div-s span { color: #fbbf24; }
+        .tier-divider.div-a span { color: #a78bfa; }
+        .tier-divider.div-b span { color: #34d399; }
+        .tier-divider.div-c span { color: #94a3b8; }
 
         footer {
             margin-top: 3rem;
@@ -362,8 +380,9 @@
         @media (max-width: 640px) {
             .container { padding: 2rem 1rem; }
             .tier-cards { grid-template-columns: 1fr; }
-            .bar-label { width: 100px; font-size: 0.75rem; }
+            .bar-label { width: 90px; font-size: 0.72rem; }
             .bar-row { gap: 0.5rem; }
+            .tier-divider { padding-left: 102px; }
         }
     </style>
 </head>
@@ -375,10 +394,10 @@
 
     <div class="container">
         <header>
-            <div class="badge">April 2026</div>
+            <div class="badge">April 8, 2026</div>
             <h1>AI Capabilities Ranking</h1>
-            <p>A tiered ranking of AI model companies based on frontier capabilities, benchmark performance, and competitive positioning.</p>
-            <p class="attribution">Based on analysis by @emollick and current benchmark data</p>
+            <p>"So we now have a pretty good picture of the state of the frontier AI model makers."</p>
+            <p class="attribution">Based on <a href="https://x.com/emollick/status/2042088011748290750">@emollick's thread</a> &mdash; 45.9K views</p>
         </header>
 
         <!-- TIER S -->
@@ -387,23 +406,36 @@
                 <div class="tier-badge">S</div>
                 <div class="tier-info">
                     <h2>The Frontier</h2>
-                    <p>World-class across the board &mdash; the undisputed Big 3</p>
+                    <p>"Stand well ahead of the pack" &mdash; may show signs of recursive self-improvement</p>
                 </div>
             </div>
             <div class="tier-cards">
                 <div class="company-card">
                     <div class="card-top">
+                        <div class="company-logo logo-google">G</div>
+                        <div>
+                            <div class="company-name">Google</div>
+                            <div class="model-name">Gemini 3.1 Pro</div>
+                        </div>
+                    </div>
+                    <div class="card-strengths">US closed source frontier leader. Leads reasoning benchmarks and multimodal capabilities. Most cost-effective frontier model.</div>
+                    <div class="card-stats">
+                        <span class="stat-chip chip-frontier">Frontier</span>
+                        <span class="stat-chip">Status <span class="stat-value">Leading</span></span>
+                    </div>
+                </div>
+                <div class="company-card">
+                    <div class="card-top">
                         <div class="company-logo logo-openai">O</div>
                         <div>
                             <div class="company-name">OpenAI</div>
-                            <div class="model-name">GPT-5.4 Pro</div>
+                            <div class="model-name">GPT-5.4</div>
                         </div>
                     </div>
-                    <div class="card-strengths">"In a class of its own" for hard &amp; complex tasks. Best all-rounder with record computer-use scores and massive context window.</div>
+                    <div class="card-strengths">US closed source frontier leader. Best all-rounder for hard and complex tasks. Record computer-use benchmark scores.</div>
                     <div class="card-stats">
-                        <span class="stat-chip">GDPVal <span class="stat-value">83%</span></span>
-                        <span class="stat-chip">SWE-bench <span class="stat-value">78.2%</span></span>
-                        <span class="stat-chip">Context <span class="stat-value">1M</span></span>
+                        <span class="stat-chip chip-frontier">Frontier</span>
+                        <span class="stat-chip">Status <span class="stat-value">Leading</span></span>
                     </div>
                 </div>
                 <div class="company-card">
@@ -414,35 +446,18 @@
                             <div class="model-name">Claude Opus 4.6</div>
                         </div>
                     </div>
-                    <div class="card-strengths">Coding &amp; agentic god-tier. Best for sustained agentic workflows, content pipelines, and developer experience. Mollick's daily driver.</div>
+                    <div class="card-strengths">US closed source frontier leader. Coding and agentic excellence. Best for sustained agentic workflows and developer tooling.</div>
                     <div class="card-stats">
-                        <span class="stat-chip">SWE-bench <span class="stat-value">80.8%</span></span>
-                        <span class="stat-chip">GDPval-AA Elo <span class="stat-value">#1</span></span>
-                        <span class="stat-chip">Context <span class="stat-value">1M</span></span>
-                        <span class="stat-chip">Output <span class="stat-value">128K</span></span>
-                    </div>
-                </div>
-                <div class="company-card">
-                    <div class="card-top">
-                        <div class="company-logo logo-google">G</div>
-                        <div>
-                            <div class="company-name">Google DeepMind</div>
-                            <div class="model-name">Gemini 3.1 Pro</div>
-                        </div>
-                    </div>
-                    <div class="card-strengths">Leads reasoning benchmarks and multimodal. Most cost-effective frontier model. Leads 13 of 16 major benchmarks.</div>
-                    <div class="card-stats">
-                        <span class="stat-chip">GPQA Diamond <span class="stat-value">94.3%</span></span>
-                        <span class="stat-chip">ARC-AGI-2 <span class="stat-value">77.1%</span></span>
-                        <span class="stat-chip">SWE-bench <span class="stat-value">78.8%</span></span>
+                        <span class="stat-chip chip-frontier">Frontier</span>
+                        <span class="stat-chip">Status <span class="stat-value">Leading</span></span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="quote-block">
-            "The failures of both Meta and xAI to maintain parity with the frontier labs, along with the fact that the Chinese open weights models continue to lag by months, means that recursive AI self-improvement, if it happens, will likely be by a model from Google, OpenAI and/or Anthropic."
-            <span class="quote-author">@emollick</span>
+            "US closed source models continue to lead. Google, OpenAI, and Anthropic stand well ahead of the pack, and may have signs of recursive self-improvement."
+            <span class="quote-author">@emollick &mdash; April 8, 2026</span>
         </div>
 
         <!-- TIER A -->
@@ -450,8 +465,8 @@
             <div class="tier-header">
                 <div class="tier-badge">A</div>
                 <div class="tier-info">
-                    <h2>Strong Contenders</h2>
-                    <p>Competitive but have failed to maintain frontier parity</p>
+                    <h2>Fallen from / Re-entering Frontier</h2>
+                    <p>Competitive but not currently at frontier status</p>
                 </div>
             </div>
             <div class="tier-cards">
@@ -460,13 +475,13 @@
                         <div class="company-logo logo-xai">X</div>
                         <div>
                             <div class="company-name">xAI</div>
-                            <div class="model-name">Grok 4.20</div>
+                            <div class="model-name">Grok</div>
                         </div>
                     </div>
-                    <div class="card-strengths">Novel 4-agent parallel architecture (Grok, Harper, Benjamin, Lucas) that debate before producing output. Grok 5 (6T MoE) expected Q2 2026.</div>
+                    <div class="card-strengths">"Has fallen from frontier status for now (though promises to return shortly)." Once competed at the frontier, but has dropped behind the Big 3.</div>
                     <div class="card-stats">
-                        <span class="stat-chip">Architecture <span class="stat-value">4-Agent MoE</span></span>
-                        <span class="stat-chip">Next <span class="stat-value">Grok 5 Q2</span></span>
+                        <span class="stat-chip chip-fallen">Fallen from Frontier</span>
+                        <span class="stat-chip chip-returning">Promises Return</span>
                     </div>
                 </div>
                 <div class="company-card">
@@ -474,16 +489,21 @@
                         <div class="company-logo logo-meta">M</div>
                         <div>
                             <div class="company-name">Meta</div>
-                            <div class="model-name">Llama 4 Maverick</div>
+                            <div class="model-name">Llama 4</div>
                         </div>
                     </div>
-                    <div class="card-strengths">Open-weights leader. Within 1-2 benchmark points of frontier on coding. New model just debuted April 8, 2026 to try to catch up.</div>
+                    <div class="card-strengths">"Re-entered the space today with a not-quite-frontier closed source model, but an approach that suggests that they might be back in the race."</div>
                     <div class="card-stats">
-                        <span class="stat-chip">License <span class="stat-value">Open Weights</span></span>
-                        <span class="stat-chip">Gap to Frontier <span class="stat-value">~1-2 pts</span></span>
+                        <span class="stat-chip chip-returning">Re-entering</span>
+                        <span class="stat-chip">Model <span class="stat-value">Not-quite-frontier</span></span>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="quote-block">
+            "xAI has fallen from frontier status for now (though promises to return shortly). Meta re-entered the space today with a not-quite-frontier closed source model, but an approach that suggests that they might be back in the race. All the other US players seem far behind."
+            <span class="quote-author">@emollick</span>
         </div>
 
         <!-- TIER B -->
@@ -491,49 +511,37 @@
             <div class="tier-header">
                 <div class="tier-badge">B</div>
                 <div class="tier-info">
-                    <h2>Open-Weights Challengers</h2>
-                    <p>Closing the gap fast &mdash; but still months behind the frontier</p>
+                    <h2>Chinese Challengers</h2>
+                    <p>"Very much in the race" &mdash; but 7-9+ months behind US closed source models</p>
                 </div>
             </div>
             <div class="tier-cards">
                 <div class="company-card">
                     <div class="card-top">
-                        <div class="company-logo logo-zai">Z</div>
-                        <div>
-                            <div class="company-name">Z.ai (Zhipu)</div>
-                            <div class="model-name">GLM-5</div>
-                        </div>
-                    </div>
-                    <div class="card-strengths">Best Chinese open-weights model. Just 3 points behind Claude Opus 4.6 on SWE-bench Verified.</div>
-                    <div class="card-stats">
-                        <span class="stat-chip">SWE-bench <span class="stat-value">77.8%</span></span>
-                    </div>
-                </div>
-                <div class="company-card">
-                    <div class="card-top">
-                        <div class="company-logo logo-deepseek">D</div>
-                        <div>
-                            <div class="company-name">DeepSeek</div>
-                            <div class="model-name">DeepSeek-V4</div>
-                        </div>
-                    </div>
-                    <div class="card-strengths">Strong reasoning at exceptional cost-efficiency. Chinese lab closing the gap to frontier models.</div>
-                    <div class="card-stats">
-                        <span class="stat-chip">Strength <span class="stat-value">Reasoning</span></span>
-                        <span class="stat-chip">Cost <span class="stat-value">Ultra-low</span></span>
-                    </div>
-                </div>
-                <div class="company-card">
-                    <div class="card-top">
                         <div class="company-logo logo-alibaba">Q</div>
                         <div>
                             <div class="company-name">Alibaba</div>
-                            <div class="model-name">Qwen 3</div>
+                            <div class="model-name">Qwen</div>
                         </div>
                     </div>
-                    <div class="card-strengths">Broad capabilities with a large open-weights ecosystem. Popular across Asian markets.</div>
+                    <div class="card-strengths">In the race, but commitment to open weights appears to be slipping.</div>
                     <div class="card-stats">
-                        <span class="stat-chip">Ecosystem <span class="stat-value">Large</span></span>
+                        <span class="stat-chip chip-behind">7-9+ mo behind</span>
+                        <span class="stat-chip chip-warning">Open weights slipping</span>
+                    </div>
+                </div>
+                <div class="company-card">
+                    <div class="card-top">
+                        <div class="company-logo logo-moonshot">K</div>
+                        <div>
+                            <div class="company-name">Moonshot</div>
+                            <div class="model-name">Kimi</div>
+                        </div>
+                    </div>
+                    <div class="card-strengths">Very much in the race among Chinese model makers.</div>
+                    <div class="card-stats">
+                        <span class="stat-chip chip-behind">7-9+ mo behind</span>
+                        <span class="stat-chip">Status <span class="stat-value">In the race</span></span>
                     </div>
                 </div>
                 <div class="company-card">
@@ -541,15 +549,63 @@
                         <div class="company-logo logo-minimax">M</div>
                         <div>
                             <div class="company-name">MiniMax</div>
-                            <div class="model-name">M2.5</div>
+                            <div class="model-name">MiniMax</div>
                         </div>
                     </div>
-                    <div class="card-strengths">Surprising upstart. Within 1-2 points of closed frontier models on coding benchmarks.</div>
+                    <div class="card-strengths">Very much in the race among Chinese model makers.</div>
                     <div class="card-stats">
-                        <span class="stat-chip">Gap to Frontier <span class="stat-value">~1-2 pts</span></span>
+                        <span class="stat-chip chip-behind">7-9+ mo behind</span>
+                        <span class="stat-chip">Status <span class="stat-value">In the race</span></span>
+                    </div>
+                </div>
+                <div class="company-card">
+                    <div class="card-top">
+                        <div class="company-logo logo-xiaomi">X</div>
+                        <div>
+                            <div class="company-name">Xiaomi</div>
+                            <div class="model-name">MiMo</div>
+                        </div>
+                    </div>
+                    <div class="card-strengths">In the race, but commitment to open weights appears to be slipping.</div>
+                    <div class="card-stats">
+                        <span class="stat-chip chip-behind">7-9+ mo behind</span>
+                        <span class="stat-chip chip-warning">Open weights slipping</span>
+                    </div>
+                </div>
+                <div class="company-card">
+                    <div class="card-top">
+                        <div class="company-logo logo-deepseek">D</div>
+                        <div>
+                            <div class="company-name">DeepSeek</div>
+                            <div class="model-name">DeepSeek</div>
+                        </div>
+                    </div>
+                    <div class="card-strengths">Very much in the race. Strong reasoning at exceptional cost-efficiency.</div>
+                    <div class="card-stats">
+                        <span class="stat-chip chip-behind">7-9+ mo behind</span>
+                        <span class="stat-chip">Status <span class="stat-value">In the race</span></span>
+                    </div>
+                </div>
+                <div class="company-card">
+                    <div class="card-top">
+                        <div class="company-logo logo-zai">Z</div>
+                        <div>
+                            <div class="company-name">Z (Zhipu)</div>
+                            <div class="model-name">GLM</div>
+                        </div>
+                    </div>
+                    <div class="card-strengths">Very much in the race among Chinese model makers.</div>
+                    <div class="card-stats">
+                        <span class="stat-chip chip-behind">7-9+ mo behind</span>
+                        <span class="stat-chip">Status <span class="stat-value">In the race</span></span>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="quote-block">
+            "On the Chinese model front, Alibaba (Qwen), Moonshot (Kimi), MiniMax, Xiaomi (MiMo), Deepseek, and Z (GLM) all still appear to be very much in the race, though the best Chinese models are still 7-9+ months behind released US closed source models. For some of these players, especially Xiaomi and Alibaba, their commitment to open weights appear to be slipping."
+            <span class="quote-author">@emollick</span>
         </div>
 
         <!-- TIER C -->
@@ -557,8 +613,8 @@
             <div class="tier-header">
                 <div class="tier-badge">C</div>
                 <div class="tier-info">
-                    <h2>Specialists &amp; Niche Players</h2>
-                    <p>Focused on specific domains rather than frontier competition</p>
+                    <h2>Fallen Behind</h2>
+                    <p>No longer at frontier status</p>
                 </div>
             </div>
             <div class="tier-cards">
@@ -567,38 +623,26 @@
                         <div class="company-logo logo-mistral">M</div>
                         <div>
                             <div class="company-name">Mistral</div>
-                            <div class="model-name">Mistral Large 3</div>
+                            <div class="model-name">Mistral Large</div>
                         </div>
                     </div>
-                    <div class="card-strengths">European AI champion. Strong multilingual capabilities and respected in enterprise contexts.</div>
+                    <div class="card-strengths">"Outside of China, Mistral seems to have fallen from frontier status." The only notable non-US, non-Chinese player &mdash; now behind.</div>
                     <div class="card-stats">
-                        <span class="stat-chip">Focus <span class="stat-value">Multilingual</span></span>
+                        <span class="stat-chip chip-fallen">Fallen from Frontier</span>
+                        <span class="stat-chip">Region <span class="stat-value">Europe</span></span>
                     </div>
                 </div>
                 <div class="company-card">
                     <div class="card-top">
-                        <div class="company-logo logo-cohere">C</div>
+                        <div class="company-logo logo-other">...</div>
                         <div>
-                            <div class="company-name">Cohere</div>
-                            <div class="model-name">Command R+</div>
+                            <div class="company-name">Other US Players</div>
+                            <div class="model-name">Cohere, AI21, etc.</div>
                         </div>
                     </div>
-                    <div class="card-strengths">Enterprise RAG and retrieval specialist. Focused purely on B2B applications.</div>
+                    <div class="card-strengths">"All the other US players seem far behind." Focused on niche enterprise domains rather than frontier competition.</div>
                     <div class="card-stats">
-                        <span class="stat-chip">Focus <span class="stat-value">Enterprise RAG</span></span>
-                    </div>
-                </div>
-                <div class="company-card">
-                    <div class="card-top">
-                        <div class="company-logo logo-ai21">J</div>
-                        <div>
-                            <div class="company-name">AI21 Labs</div>
-                            <div class="model-name">Jamba 2</div>
-                        </div>
-                    </div>
-                    <div class="card-strengths">Efficient architectures for specialized use cases. Innovative Mamba-based hybrid approach.</div>
-                    <div class="card-stats">
-                        <span class="stat-chip">Focus <span class="stat-value">Efficiency</span></span>
+                        <span class="stat-chip chip-fallen">Far Behind</span>
                     </div>
                 </div>
             </div>
@@ -606,54 +650,66 @@
 
         <!-- BAR CHART -->
         <div class="bar-chart">
-            <h2>Relative Capability Index</h2>
+            <h2>Relative Position (Mollick's Assessment)</h2>
+
+            <div class="tier-divider div-s"><span>S-Tier &mdash; Frontier</span><div class="line"></div></div>
+            <div class="bar-row">
+                <div class="bar-label">Google</div>
+                <div class="bar-track"><div class="bar-fill bar-s" data-width="97%">Frontier</div></div>
+            </div>
             <div class="bar-row">
                 <div class="bar-label">OpenAI</div>
-                <div class="bar-track"><div class="bar-fill bar-s" data-width="96%">96</div></div>
+                <div class="bar-track"><div class="bar-fill bar-s" data-width="96%">Frontier</div></div>
             </div>
             <div class="bar-row">
                 <div class="bar-label">Anthropic</div>
-                <div class="bar-track"><div class="bar-fill bar-s" data-width="95%">95</div></div>
+                <div class="bar-track"><div class="bar-fill bar-s" data-width="96%">Frontier</div></div>
             </div>
-            <div class="bar-row">
-                <div class="bar-label">Google DeepMind</div>
-                <div class="bar-track"><div class="bar-fill bar-s" data-width="95%">95</div></div>
-            </div>
+
+            <div class="tier-divider div-a"><span>A-Tier &mdash; Fallen / Re-entering</span><div class="line"></div></div>
             <div class="bar-row">
                 <div class="bar-label">xAI</div>
-                <div class="bar-track"><div class="bar-fill bar-a" data-width="78%">78</div></div>
+                <div class="bar-track"><div class="bar-fill bar-a" data-width="72%">Fallen</div></div>
             </div>
             <div class="bar-row">
                 <div class="bar-label">Meta</div>
-                <div class="bar-track"><div class="bar-fill bar-a" data-width="76%">76</div></div>
+                <div class="bar-track"><div class="bar-fill bar-a" data-width="68%">Re-entering</div></div>
             </div>
-            <div class="bar-row">
-                <div class="bar-label">Z.ai (Zhipu)</div>
-                <div class="bar-track"><div class="bar-fill bar-b" data-width="68%">68</div></div>
-            </div>
-            <div class="bar-row">
-                <div class="bar-label">DeepSeek</div>
-                <div class="bar-track"><div class="bar-fill bar-b" data-width="65%">65</div></div>
-            </div>
+
+            <div class="tier-divider div-b"><span>B-Tier &mdash; Chinese Challengers (7-9+ mo behind)</span><div class="line"></div></div>
             <div class="bar-row">
                 <div class="bar-label">Alibaba</div>
-                <div class="bar-track"><div class="bar-fill bar-b" data-width="62%">62</div></div>
+                <div class="bar-track"><div class="bar-fill bar-b" data-width="56%">In the race</div></div>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">Moonshot</div>
+                <div class="bar-track"><div class="bar-fill bar-b" data-width="54%">In the race</div></div>
             </div>
             <div class="bar-row">
                 <div class="bar-label">MiniMax</div>
-                <div class="bar-track"><div class="bar-fill bar-b" data-width="60%">60</div></div>
+                <div class="bar-track"><div class="bar-fill bar-b" data-width="54%">In the race</div></div>
             </div>
+            <div class="bar-row">
+                <div class="bar-label">Xiaomi</div>
+                <div class="bar-track"><div class="bar-fill bar-b" data-width="53%">In the race</div></div>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">DeepSeek</div>
+                <div class="bar-track"><div class="bar-fill bar-b" data-width="55%">In the race</div></div>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">Z (Zhipu)</div>
+                <div class="bar-track"><div class="bar-fill bar-b" data-width="53%">In the race</div></div>
+            </div>
+
+            <div class="tier-divider div-c"><span>C-Tier &mdash; Fallen Behind</span><div class="line"></div></div>
             <div class="bar-row">
                 <div class="bar-label">Mistral</div>
-                <div class="bar-track"><div class="bar-fill bar-c" data-width="48%">48</div></div>
+                <div class="bar-track"><div class="bar-fill bar-c" data-width="40%">Fallen</div></div>
             </div>
             <div class="bar-row">
-                <div class="bar-label">Cohere</div>
-                <div class="bar-track"><div class="bar-fill bar-c" data-width="42%">42</div></div>
-            </div>
-            <div class="bar-row">
-                <div class="bar-label">AI21 Labs</div>
-                <div class="bar-track"><div class="bar-fill bar-c" data-width="38%">38</div></div>
+                <div class="bar-label">Other US</div>
+                <div class="bar-track"><div class="bar-fill bar-c" data-width="30%">Far behind</div></div>
             </div>
         </div>
 
@@ -661,28 +717,37 @@
         <div class="takeaways">
             <h2>Key Takeaways</h2>
             <ul>
-                <li><strong>A triopoly has formed</strong> &mdash; OpenAI, Anthropic, and Google are effectively tied at the frontier. Choosing between them comes down to workflow fit, not raw capability.</li>
-                <li><strong>The gap is real</strong> &mdash; Meta and xAI have fallen behind the Big 3 and have not been able to maintain parity.</li>
-                <li><strong>Open-weights is catching up</strong> &mdash; Chinese labs and open models are within striking distance but still lag by months behind closed frontier models.</li>
-                <li><strong>The frontier is tighter than ever</strong> &mdash; Five or more models now compete within a few benchmark points of each other.</li>
-                <li><strong>Revenue tells the story</strong> &mdash; Anthropic ($30B run rate) has overtaken OpenAI ($24-25B) in annualized revenue for the first time.</li>
+                <li><strong>The Big 3 dominate</strong> &mdash; Google, OpenAI, and Anthropic stand well ahead of the pack, with possible signs of recursive self-improvement.</li>
+                <li><strong>xAI has fallen from frontier</strong> &mdash; Dropped out but promises to return shortly.</li>
+                <li><strong>Meta is re-entering</strong> &mdash; Not-quite-frontier yet, but a new approach suggests they might be back in the race.</li>
+                <li><strong>Chinese labs are 7-9+ months behind</strong> &mdash; All six named companies are very much in the race, but lagging released US closed source models.</li>
+                <li><strong>Open weights commitment is slipping</strong> &mdash; Especially for Xiaomi and Alibaba, raising questions about the future of open-weights AI from China.</li>
+                <li><strong>Mistral has fallen</strong> &mdash; The sole notable non-US, non-Chinese player has dropped from frontier status.</li>
+                <li><strong>Other US players are far behind</strong> &mdash; The gap between the Big 3 and everyone else in the US is wide.</li>
             </ul>
         </div>
 
         <footer>
-            Sources: <a href="https://x.com/emollick">@emollick</a>, Artificial Analysis, LLM-Stats, BuildFastWithAI, FutureSearch.ai &mdash; April 2026<br>
-            Note: X/Twitter blocked automated access to the original thread. Rankings synthesized from Mollick's recent public commentary and current benchmark data.
+            Source: <a href="https://x.com/emollick/status/2042088011748290750">@emollick</a> &mdash; 11:51 PM, April 8, 2026 &mdash; 45.9K Views
         </footer>
     </div>
 
     <script>
-        // Animate bars on load
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.querySelectorAll('.bar-fill').forEach(bar => {
-                    bar.style.width = bar.dataset.width;
-                });
-            }, 300);
+        // Animate bars on scroll into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.querySelectorAll('.bar-fill').forEach(bar => {
+                        bar.style.width = bar.dataset.width;
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const chart = document.querySelector('.bar-chart');
+            if (chart) observer.observe(chart);
         });
     </script>
 </body>

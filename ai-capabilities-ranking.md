@@ -1,69 +1,77 @@
 # AI Model Company Capabilities Ranking (April 2026)
 
-*Based on Ethan Mollick's (@emollick) analysis of frontier AI labs and the current competitive landscape*
+*Based on [Ethan Mollick's (@emollick) thread](https://x.com/emollick/status/2042088011748290750) — April 8, 2026*
+
+> "So we now have a pretty good picture of the state of the frontier AI model makers."
 
 ---
 
-## Tier S — The Frontier (World-Class Across the Board)
+## Tier S — The Frontier
 
-| Company | Flagship Model | Key Strengths | Benchmark Highlights |
-|---------|---------------|---------------|---------------------|
-| **OpenAI** | GPT-5.4 Pro | Best all-rounder; "in a class of its own" for hard & complex tasks; massive context | 83% GDPVal, Record OSWorld & WebArena scores, 1M context |
-| **Anthropic** | Claude Opus 4.6 | Coding & agentic god-tier; best for sustained agentic workflows | 80.8% SWE-bench, 1M context (beta), 128K output, #1 GDPval-AA Elo (1,633) |
-| **Google DeepMind** | Gemini 3.1 Pro | Leads reasoning; best multimodal; most cost-effective frontier model | 94.3% GPQA Diamond, 77.1% ARC-AGI-2, leads 13/16 benchmarks |
+**"Stand well ahead of the pack, and may have signs of recursive self-improvement."**
 
-> *"The failures of both Meta and xAI to maintain parity with the frontier labs... means that recursive AI self-improvement, if it happens, will likely be by a model from Google, OpenAI and/or Anthropic"* — @emollick
+| Company | Key Model | Status |
+|---------|-----------|--------|
+| **Google** | Gemini 3.1 Pro | Frontier leader |
+| **OpenAI** | GPT-5.4 | Frontier leader |
+| **Anthropic** | Claude Opus 4.6 | Frontier leader |
 
----
-
-## Tier A — Strong Contenders (Competitive but Not Frontier)
-
-| Company | Flagship Model | Key Strengths | Notes |
-|---------|---------------|---------------|-------|
-| **xAI** | Grok 4.20 | Novel 4-agent parallel architecture; strong reasoning | Innovative multi-agent debate system; Grok 5 (6T MoE) expected Q2 2026 |
-| **Meta** | Llama 4 Maverick | Open-weights leader; within 1-2 pts of frontier on coding | Just debuted new model (Apr 8); still chasing frontier parity |
+> US closed source models continue to lead. All three stand well ahead of the pack.
 
 ---
 
-## Tier B — The Open-Weights Challengers (Closing the Gap Fast)
+## Tier A — Fallen from / Re-entering Frontier
 
-| Company | Flagship Model | Key Strengths | Notes |
-|---------|---------------|---------------|-------|
-| **Z.ai (Zhipu)** | GLM-5 | 77.8% SWE-bench — just 3 pts behind Opus 4.6 | Best Chinese open-weights model |
-| **DeepSeek** | DeepSeek-V4 | Strong reasoning; cost-efficient | Chinese lab; months behind frontier but closing |
-| **Alibaba** | Qwen 3 | Broad capabilities; large open-weights ecosystem | Popular in Asian markets |
-| **MiniMax** | M2.5 | Within 1-2 pts of frontier on coding benchmarks | Surprising competitor |
+**Competitive but not currently at frontier status.**
 
-> *Chinese open-weights models "continue to lag by months"* — @emollick
+| Company | Key Model | Status |
+|---------|-----------|--------|
+| **xAI** | Grok 4.20 | "Fallen from frontier status for now (though promises to return shortly)" |
+| **Meta** | Llama 4 | "Re-entered the space today with a not-quite-frontier closed source model, but an approach that suggests that they might be back in the race" |
 
 ---
 
-## Tier C — The Specialists & Niche Players
+## Tier B — Chinese Challengers (7-9+ Months Behind)
 
-| Company | Flagship Model | Key Strengths | Notes |
-|---------|---------------|---------------|-------|
-| **Mistral** | Mistral Large 3 | European AI champion; strong multilingual | Niche but respected |
-| **Cohere** | Command R+ | Enterprise RAG & retrieval | Focused on B2B |
-| **AI21 Labs** | Jamba 2 | Efficient architectures | Specialized use cases |
+**"All still appear to be very much in the race, though the best Chinese models are still 7-9+ months behind released US closed source models."**
+
+| Company | Key Model | Notes |
+|---------|-----------|-------|
+| **Alibaba** | Qwen | Commitment to open weights "appear to be slipping" |
+| **Moonshot** | Kimi | In the race |
+| **MiniMax** | M2.5 | In the race |
+| **Xiaomi** | MiMo | Commitment to open weights "appear to be slipping" |
+| **DeepSeek** | DeepSeek-V4 | In the race |
+| **Z.ai (Zhipu)** | GLM | In the race |
+
+---
+
+## Tier C — Fallen Behind
+
+| Company | Key Model | Status |
+|---------|-----------|--------|
+| **Mistral** | Mistral Large | "Outside of China, Mistral seems to have fallen from frontier status" |
+| **Other US Players** | Various | "All the other US players seem far behind" |
 
 ---
 
 ## The Big Picture
 
 ```
-S-Tier ████████████████████████████████████████ OpenAI, Anthropic, Google
-A-Tier ██████████████████████████████           xAI, Meta
-B-Tier ████████████████████████                 Z.ai, DeepSeek, Alibaba, MiniMax
-C-Tier ████████████████                         Mistral, Cohere, AI21
+S-Tier  ████████████████████████████████████████ Google, OpenAI, Anthropic
+A-Tier  ██████████████████████████████           xAI, Meta
+B-Tier  ████████████████████████                 Alibaba, Moonshot, MiniMax, Xiaomi, DeepSeek, Z
+C-Tier  ████████████████                         Mistral, Other US Players
 ```
 
 ### Key Takeaways
-1. **A triopoly has formed** — OpenAI, Anthropic, and Google are effectively tied at the top, with choosing between them coming down to workflow fit rather than raw capability
-2. **The gap is real** — Meta and xAI have fallen behind the Big 3 frontier labs
-3. **Open-weights is catching up** — Chinese labs and open models are within striking distance but still lag by months
-4. **The frontier is tighter than ever** — Five+ models compete within a few benchmark points of each other
-5. **Revenue tells the story** — Anthropic ($30B run rate) has overtaken OpenAI ($24-25B) in annualized revenue
+1. **The Big 3 dominate** — Google, OpenAI, and Anthropic stand well ahead with possible signs of recursive self-improvement
+2. **xAI has fallen** — Dropped from frontier status, though promises to return shortly
+3. **Meta is re-entering** — Not-quite-frontier yet, but the approach suggests they might be back
+4. **Chinese labs are 7-9+ months behind** — Very much in the race, but lagging released US closed source models
+5. **Open weights commitment slipping** — Especially Xiaomi and Alibaba
+6. **Mistral has fallen** — The only non-US, non-Chinese player has dropped from frontier status
 
 ---
 
-*Sources: @emollick tweets, Artificial Analysis, LLM-Stats, BuildFastWithAI, FutureSearch.ai — April 2026*
+*Source: [@emollick](https://x.com/emollick/status/2042088011748290750) — 11:51 PM, April 8, 2026 — 45.9K Views*
