@@ -44,6 +44,15 @@ struct RedsSectionView: View {
                     .foregroundColor(theme.fgDim)
                     .padding(.bottom, 2)
 
+                HStack(spacing: 6) {
+                    Text("").frame(width: 30)
+                    Text("").frame(maxWidth: .infinity)
+                    Text("W-L").frame(width: 48, alignment: .trailing)
+                    Text("GB").frame(width: 36, alignment: .trailing)
+                }
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(theme.fgDim)
+
                 ForEach(standings, id: \.abbr) { team in
                     standingsRow(team)
                 }
@@ -76,12 +85,12 @@ struct RedsSectionView: View {
 
             Text("\(team.wins)-\(team.losses)")
                 .font(.system(size: 12, design: .monospaced))
-                .foregroundColor(team.isReds ? team.color : theme.fg)
+                .foregroundColor(team.color)
                 .frame(width: 48, alignment: .trailing)
 
             Text(team.gamesBack)
                 .font(.system(size: 12, design: .monospaced))
-                .foregroundColor(team.rank == 1 ? Sol.green : theme.fgDim)
+                .foregroundColor(team.rank == 1 ? Sol.green : team.color)
                 .frame(width: 36, alignment: .trailing)
         }
     }

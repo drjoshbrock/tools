@@ -123,38 +123,56 @@ struct WeatherSectionView: View {
     }
 
     private let chartSize: CGFloat = 14
-    private let timeLabelMap: [Int: String] = [0: "6a", 3: "9a", 6: "12p", 9: "3p", 12: "6p", 15: "9p"]
+
+    private var chartLabelRow: Text {
+        let labels: [(Int, String)] = [(0, "6a"), (3, "9a"), (6, "12p"), (9, "3p"), (12, "6p"), (15, "9p")]
+        var chars = Array(repeating: " ", count: 18)
+        for (pos, label) in labels {
+            for (j, ch) in label.enumerated() {
+                if pos + j < 18 { chars[pos + j] = String(ch) }
+            }
+        }
+        return Text(chars.joined()).foregroundColor(theme.fgDim)
+    }
+
+    private func rainBarRow(_ slice: [Int]) -> Text {
+        let blocks: [Character] = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+        var result = Text("")
+        for pct in slice {
+            let idx = min(8, Int((Double(pct) / 100.0 * 8).rounded()))
+            let color: Color = pct > 60 ? Sol.red : pct > 40 ? Sol.orange : pct > 20 ? Sol.orange : Sol.green
+            result = result + Text(String(blocks[idx])).foregroundColor(color)
+        }
+        return result
+    }
+
+    private func tempBarRow(_ slice: [Double]) -> Text {
+        let blocks: [Character] = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+        let minT = slice.min() ?? 0
+        let maxT = slice.max() ?? 100
+        let range = max(maxT - minT, 1)
+        var result = Text("")
+        for t in slice {
+            let norm = (t - minT) / range
+            let idx = min(8, Int((norm * 8).rounded()))
+            let color: Color = t > 90 ? Sol.red : t > 75 ? Sol.orange : t > 55 ? Sol.magenta : Sol.cyan
+            result = result + Text(String(blocks[idx])).foregroundColor(color)
+        }
+        return result
+    }
 
     @ViewBuilder
     private var rainBox: some View {
-        let blocks: [Character] = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
         let slice = Array(hourlyRain[6...23])
 
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 2) {
             Text("HOURLY RAIN %")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
-
-            VStack(spacing: 2) {
-                HStack(spacing: 0) {
-                    ForEach(0..<slice.count, id: \.self) { i in
-                        let pct = slice[i]
-                        let idx = min(8, Int((Double(pct) / 100.0 * 8).rounded()))
-                        let color: Color = pct > 60 ? Sol.red : pct > 40 ? Sol.orange : pct > 20 ? Sol.orange : Sol.green
-                        Text(String(blocks[idx]))
-                            .foregroundColor(color)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                HStack(spacing: 0) {
-                    ForEach(0..<slice.count, id: \.self) { i in
-                        Text(timeLabelMap[i] ?? "")
-                            .foregroundColor(theme.fgDim)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-            }
-            .font(.system(size: chartSize, design: .monospaced))
+            rainBarRow(slice)
+                .font(.system(size: chartSize, design: .monospaced))
+            chartLabelRow
+                .font(.system(size: chartSize, design: .monospaced))
         }
         .padding(8)
         .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
@@ -162,38 +180,16 @@ struct WeatherSectionView: View {
 
     @ViewBuilder
     private var tempBox: some View {
-        let blocks: [Character] = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
         let slice = Array(hourlyTemp[6...23])
-        let minT = slice.min() ?? 0
-        let maxT = slice.max() ?? 100
-        let range = max(maxT - minT, 1)
 
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 2) {
             Text("HOURLY TEMP °F")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
-
-            VStack(spacing: 2) {
-                HStack(spacing: 0) {
-                    ForEach(0..<slice.count, id: \.self) { i in
-                        let t = slice[i]
-                        let norm = (t - minT) / range
-                        let idx = min(8, Int((norm * 8).rounded()))
-                        let color: Color = t > 90 ? Sol.red : t > 75 ? Sol.orange : t > 55 ? Sol.magenta : Sol.cyan
-                        Text(String(blocks[idx]))
-                            .foregroundColor(color)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-                HStack(spacing: 0) {
-                    ForEach(0..<slice.count, id: \.self) { i in
-                        Text(timeLabelMap[i] ?? "")
-                            .foregroundColor(theme.fgDim)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
-            }
-            .font(.system(size: chartSize, design: .monospaced))
+            tempBarRow(slice)
+                .font(.system(size: chartSize, design: .monospaced))
+            chartLabelRow
+                .font(.system(size: chartSize, design: .monospaced))
         }
         .padding(8)
         .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
@@ -233,8 +229,9 @@ struct WeatherSectionView: View {
             }
             error = nil
         } catch is CancellationError {
-            // Keep existing data on cancellation
+            return
         } catch {
+            if Task.isCancelled { return }
             self.error = error.localizedDescription
         }
         isLoading = false

@@ -251,8 +251,9 @@ class SportsDataStore {
 
             reds = SportsResult(games: result, error: nil)
         } catch is CancellationError {
-            // Keep existing data on cancellation
+            return
         } catch {
+            if Task.isCancelled { return }
             reds = SportsResult(games: [], error: error.localizedDescription)
         }
     }
@@ -309,12 +310,12 @@ class SportsDataStore {
 
     // MARK: - NL Central Standings
 
-    private let nlCentralColors: [String: (color: Color, abbr: String)] = [
-        "Cincinnati Reds": (Sol.red, "CIN"),
-        "St. Louis Cardinals": (Sol.magenta, "STL"),
-        "Chicago Cubs": (Sol.blue, "CHC"),
-        "Milwaukee Brewers": (Sol.cyan, "MIL"),
-        "Pittsburgh Pirates": (Sol.orange, "PIT"),
+    private let nlCentralInfo: [Int: (color: Color, abbr: String)] = [
+        113: (Sol.red, "CIN"),       // Cincinnati Reds
+        138: (Sol.magenta, "STL"),   // St. Louis Cardinals
+        112: (Sol.blue, "CHC"),      // Chicago Cubs
+        158: (Sol.cyan, "MIL"),      // Milwaukee Brewers
+        134: (Sol.orange, "PIT"),    // Pittsburgh Pirates
     ]
 
     private func loadNLCentralStandings() async {
@@ -339,9 +340,8 @@ class SportsDataStore {
             var teams: [NLCentralTeam] = []
 
             for tr in teamRecords {
-                let name = tr.team.name
-                let info = nlCentralColors[name]
-                let abbr = info?.abbr ?? mlbAbbr(name)
+                let info = nlCentralInfo[tr.team.id]
+                let abbr = info?.abbr ?? mlbAbbr(tr.team.name)
                 let color = info?.color ?? Sol.base01
                 let isReds = tr.team.id == DashboardConfig.redsId
                 let rank = Int(tr.divisionRank ?? "0") ?? 0
@@ -366,8 +366,9 @@ class SportsDataStore {
             teams.sort { $0.rank < $1.rank }
             nlCentralStandings = teams
         } catch is CancellationError {
-            // Keep existing data on cancellation
+            return
         } catch {
+            if Task.isCancelled { return }
             nlCentralStandings = []
         }
     }
@@ -421,8 +422,9 @@ class SportsDataStore {
 
             espnResults[key] = SportsResult(games: result, error: nil, record: record)
         } catch is CancellationError {
-            // Keep existing data on cancellation
+            return
         } catch {
+            if Task.isCancelled { return }
             espnResults[key] = SportsResult(games: [], error: error.localizedDescription)
         }
     }
@@ -493,8 +495,9 @@ class SportsDataStore {
 
             espnResults[key] = SportsResult(games: result, error: nil, record: record)
         } catch is CancellationError {
-            // Keep existing data on cancellation
+            return
         } catch {
+            if Task.isCancelled { return }
             espnResults[key] = SportsResult(games: [], error: error.localizedDescription)
         }
     }

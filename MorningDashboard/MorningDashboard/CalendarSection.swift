@@ -133,6 +133,7 @@ struct CalendarSectionView: View {
         } catch is CancellationError {
             return
         } catch {
+            if Task.isCancelled { return }
             state = .error(error.localizedDescription)
             return
         }

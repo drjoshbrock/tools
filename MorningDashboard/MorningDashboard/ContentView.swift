@@ -334,7 +334,7 @@ struct ScoreRow: View {
                 .font(.system(size: 14, design: .monospaced))
                 .fontWeight(.bold)
                 .foregroundColor(color)
-                .frame(width: 24, alignment: .trailing)
+                .frame(width: 34, alignment: .trailing)
         }
     }
 }
