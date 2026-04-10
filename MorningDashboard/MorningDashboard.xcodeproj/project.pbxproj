@@ -17,6 +17,7 @@
 		408BF9C72DA5C3D400A1B2C3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 408BF9B72DA5C3D400A1B2C3 /* Assets.xcassets */; };
 		408BF9C82DA5C3D400A1B2C3 /* SportsDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */; };
 		408BF9CC2DA5C3D400A1B2C3 /* DashboardMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BF9BC2DA5C3D400A1B2C3 /* DashboardMode.swift */; };
+		408BFA102DA5C3D400A1B2C3 /* SummarySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408BFA112DA5C3D400A1B2C3 /* SummarySection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		408BF9B92DA5C3D400A1B2C3 /* MorningDashboard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MorningDashboard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportsDataStore.swift; sourceTree = "<group>"; };
 		408BF9BC2DA5C3D400A1B2C3 /* DashboardMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardMode.swift; sourceTree = "<group>"; };
+		408BFA112DA5C3D400A1B2C3 /* SummarySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummarySection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +75,7 @@
 				408BF9B62DA5C3D400A1B2C3 /* ESPNSection.swift */,
 				408BF9BA2DA5C3D400A1B2C3 /* SportsDataStore.swift */,
 				408BF9BC2DA5C3D400A1B2C3 /* DashboardMode.swift */,
+				408BFA112DA5C3D400A1B2C3 /* SummarySection.swift */,
 				408BF9B72DA5C3D400A1B2C3 /* Assets.xcassets */,
 				408BF9B82DA5C3D400A1B2C3 /* Info.plist */,
 			);
@@ -159,6 +162,7 @@
 				408BF9C62DA5C3D400A1B2C3 /* ESPNSection.swift in Sources */,
 				408BF9C82DA5C3D400A1B2C3 /* SportsDataStore.swift in Sources */,
 				408BF9CC2DA5C3D400A1B2C3 /* DashboardMode.swift in Sources */,
+				408BFA102DA5C3D400A1B2C3 /* SummarySection.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,7 +221,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -273,7 +277,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;

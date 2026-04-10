@@ -195,6 +195,7 @@ class SportsDataStore {
     var espnResults: [String: SportsResult<ESPNGameInfo>] = [:]
     var nlCentralStandings: [NLCentralTeam] = []
     var hasLoadedOnce = false
+    var loadGeneration = 0
 
     func loadAll(mode: DashboardModeType = .morning) async {
         await withTaskGroup(of: Void.self) { group in
@@ -206,6 +207,7 @@ class SportsDataStore {
             group.addTask { await self.loadESPN(.ukFootball, mode: mode) }
         }
         hasLoadedOnce = true
+        loadGeneration += 1
     }
 
     // MARK: - Reds Loading
