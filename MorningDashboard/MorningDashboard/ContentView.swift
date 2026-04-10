@@ -63,22 +63,35 @@ struct ContentView: View {
                 WeatherSectionView(theme: theme, refreshTrigger: refreshTrigger)
                 CalendarSectionView(theme: theme, refreshTrigger: refreshTrigger)
 
-                if !sportsStore.reds.games.isEmpty || sportsStore.reds.error != nil
-                    || !sportsStore.nlCentralStandings.isEmpty {
-                    RedsSectionView(games: sportsStore.reds.games,
-                                    error: sportsStore.reds.error,
-                                    record: sportsStore.redsRecord,
-                                    standings: sportsStore.nlCentralStandings,
-                                    theme: theme)
-                }
+                if !sportsStore.hasLoadedOnce {
+                    // Show loading placeholders on first load
+                    DashboardSection(title: "REDS", subtitle: "Cincinnati", theme: theme) {
+                        LoadingDotsView(theme: theme)
+                    }
+                    ForEach([ESPNTeamConfig.lakers, .dolphins, .ukBasketball, .ukFootball],
+                            id: \.id) { config in
+                        DashboardSection(title: config.sectionTitle, subtitle: config.sectionSubtitle, theme: theme) {
+                            LoadingDotsView(theme: theme)
+                        }
+                    }
+                } else {
+                    if !sportsStore.reds.games.isEmpty || sportsStore.reds.error != nil
+                        || !sportsStore.nlCentralStandings.isEmpty {
+                        RedsSectionView(games: sportsStore.reds.games,
+                                        error: sportsStore.reds.error,
+                                        record: sportsStore.redsRecord,
+                                        standings: sportsStore.nlCentralStandings,
+                                        theme: theme)
+                    }
 
-                ForEach([ESPNTeamConfig.lakers, .dolphins, .ukBasketball, .ukFootball],
-                        id: \.id) { config in
-                    let result = sportsStore.espnResults[config.id]
-                    if let result, !result.games.isEmpty || result.error != nil {
-                        ESPNSectionView(config: config, games: result.games,
-                                        error: result.error,
-                                        record: result.record, theme: theme)
+                    ForEach([ESPNTeamConfig.lakers, .dolphins, .ukBasketball, .ukFootball],
+                            id: \.id) { config in
+                        let result = sportsStore.espnResults[config.id]
+                        if let result, !result.games.isEmpty || result.error != nil {
+                            ESPNSectionView(config: config, games: result.games,
+                                            error: result.error,
+                                            record: result.record, theme: theme)
+                        }
                     }
                 }
 
@@ -350,6 +363,23 @@ struct MatchupView: View {
                 .foregroundColor(theme.fgDim)
                 .frame(maxWidth: .infinity)
                 .padding(.bottom, 8)
+        }
+    }
+}
+
+// MARK: - Loading Animation
+
+struct LoadingDotsView: View {
+    let theme: Theme
+
+    private let frames = ["·     ", "· ·   ", "· · · ", "  · · ", "    · ", "      "]
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 0.3)) { context in
+            let idx = Int(context.date.timeIntervalSince1970 / 0.3) % frames.count
+            Text(frames[idx])
+                .font(.system(size: 14, design: .monospaced))
+                .foregroundColor(Sol.cyan)
         }
     }
 }

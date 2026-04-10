@@ -53,9 +53,7 @@ struct CalendarSectionView: View {
             DashboardSection(title: "SCHEDULE", subtitle: dashboardMode.calendarSubtitle, theme: theme) {
                 switch state {
                 case .loading:
-                    Text("loading...")
-                        .font(.system(size: 14, design: .monospaced))
-                        .foregroundColor(theme.fgDim)
+                    LoadingDotsView(theme: theme)
                 case .denied:
                     Text("Calendar access denied. Enable in Settings > Privacy > Calendars.")
                         .font(.system(size: 12, design: .monospaced))
@@ -116,15 +114,24 @@ struct CalendarSectionView: View {
         .background(event.isNow ? theme.bgHighlight : Color.clear)
     }
 
+    private var hasEvents: Bool {
+        if case .events = state { return true }
+        return false
+    }
+
     private func loadCalendar() async {
+        if !hasEvents { state = .loading }
         let store = EKEventStore()
 
         do {
+            try Task.checkCancellation()
             let granted = try await store.requestFullAccessToEvents()
             guard granted else {
                 state = .denied
                 return
             }
+        } catch is CancellationError {
+            return
         } catch {
             state = .error(error.localizedDescription)
             return

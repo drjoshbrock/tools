@@ -194,6 +194,7 @@ class SportsDataStore {
     var redsRecord: String?
     var espnResults: [String: SportsResult<ESPNGameInfo>] = [:]
     var nlCentralStandings: [NLCentralTeam] = []
+    var hasLoadedOnce = false
 
     func loadAll(mode: DashboardModeType = .morning) async {
         await withTaskGroup(of: Void.self) { group in
@@ -204,6 +205,7 @@ class SportsDataStore {
             group.addTask { await self.loadESPN(.ukBasketball, mode: mode) }
             group.addTask { await self.loadESPN(.ukFootball, mode: mode) }
         }
+        hasLoadedOnce = true
     }
 
     // MARK: - Reds Loading
@@ -219,6 +221,7 @@ class SportsDataStore {
         let label2 = isEvening ? "TOMORROW" : "TODAY"
 
         do {
+            try Task.checkCancellation()
             let url1 = "https://statsapi.mlb.com/api/v1/schedule?teamId=\(redsId)&date=\(date1)&sportId=1&hydrate=probablePitcher,linescore,decisions,team"
             let url2 = "https://statsapi.mlb.com/api/v1/schedule?teamId=\(redsId)&date=\(date2)&sportId=1&hydrate=probablePitcher,linescore,decisions,team"
 
@@ -227,6 +230,7 @@ class SportsDataStore {
 
             let (bytes1, _) = try await data1
             let (bytes2, _) = try await data2
+            try Task.checkCancellation()
 
             let resp1 = try JSONDecoder().decode(MLBResponse.self, from: bytes1)
             let resp2 = try JSONDecoder().decode(MLBResponse.self, from: bytes2)
@@ -246,6 +250,8 @@ class SportsDataStore {
             }
 
             reds = SportsResult(games: result, error: nil)
+        } catch is CancellationError {
+            // Keep existing data on cancellation
         } catch {
             reds = SportsResult(games: [], error: error.localizedDescription)
         }
@@ -313,43 +319,54 @@ class SportsDataStore {
 
     private func loadNLCentralStandings() async {
         let year = Calendar.current.component(.year, from: Date())
-        let urlStr = "https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=\(year)&standingsTypes=regularSeason&divisionId=205"
+        // Fetch all NL standings and find the Reds' division dynamically
+        let urlStr = "https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=\(year)&standingsTypes=regularSeason"
 
         do {
+            try Task.checkCancellation()
             let (data, _) = try await URLSession.shared.data(from: URL(string: urlStr)!)
+            try Task.checkCancellation()
             let resp = try JSONDecoder().decode(MLBStandingsResponse.self, from: data)
+
+            // Find the division record that contains the Reds
+            guard let redsRecord = resp.records?.first(where: { record in
+                record.teamRecords?.contains(where: { $0.team.id == DashboardConfig.redsId }) == true
+            }), let teamRecords = redsRecord.teamRecords else {
+                nlCentralStandings = []
+                return
+            }
 
             var teams: [NLCentralTeam] = []
 
-            if let records = resp.records?.first?.teamRecords {
-                for tr in records {
-                    let name = tr.team.name
-                    let info = nlCentralColors[name]
-                    let abbr = info?.abbr ?? mlbAbbr(name)
-                    let color = info?.color ?? Sol.base01
-                    let isReds = tr.team.id == DashboardConfig.redsId
-                    let rank = Int(tr.divisionRank ?? "0") ?? 0
-                    let gb = tr.gamesBack ?? "-"
-                    let gbDisplay = gb == "-" ? "—" : gb
+            for tr in teamRecords {
+                let name = tr.team.name
+                let info = nlCentralColors[name]
+                let abbr = info?.abbr ?? mlbAbbr(name)
+                let color = info?.color ?? Sol.base01
+                let isReds = tr.team.id == DashboardConfig.redsId
+                let rank = Int(tr.divisionRank ?? "0") ?? 0
+                let gb = tr.gamesBack ?? "-"
+                let gbDisplay = gb == "-" ? "—" : gb
 
-                    teams.append(NLCentralTeam(
-                        abbr: abbr,
-                        wins: tr.wins,
-                        losses: tr.losses,
-                        gamesBack: gbDisplay,
-                        rank: rank,
-                        color: color,
-                        isReds: isReds
-                    ))
+                teams.append(NLCentralTeam(
+                    abbr: abbr,
+                    wins: tr.wins,
+                    losses: tr.losses,
+                    gamesBack: gbDisplay,
+                    rank: rank,
+                    color: color,
+                    isReds: isReds
+                ))
 
-                    if isReds {
-                        redsRecord = "\(tr.wins)-\(tr.losses)"
-                    }
+                if isReds {
+                    self.redsRecord = "\(tr.wins)-\(tr.losses)"
                 }
             }
 
             teams.sort { $0.rank < $1.rank }
             nlCentralStandings = teams
+        } catch is CancellationError {
+            // Keep existing data on cancellation
         } catch {
             nlCentralStandings = []
         }
@@ -377,11 +394,13 @@ class SportsDataStore {
         let base = "https://site.api.espn.com/apis/site/v2/sports/\(config.sport)/\(config.league)/scoreboard"
 
         do {
+            try Task.checkCancellation()
             async let data1 = URLSession.shared.data(from: URL(string: "\(base)?dates=\(date1Str)")!)
             async let data2 = URLSession.shared.data(from: URL(string: "\(base)?dates=\(date2Str)")!)
 
             let (bytes1, _) = try await data1
             let (bytes2, _) = try await data2
+            try Task.checkCancellation()
 
             let resp1 = try JSONDecoder().decode(ESPNResponse.self, from: bytes1)
             let resp2 = try JSONDecoder().decode(ESPNResponse.self, from: bytes2)
@@ -401,6 +420,8 @@ class SportsDataStore {
             }
 
             espnResults[key] = SportsResult(games: result, error: nil, record: record)
+        } catch is CancellationError {
+            // Keep existing data on cancellation
         } catch {
             espnResults[key] = SportsResult(games: [], error: error.localizedDescription)
         }
@@ -412,7 +433,9 @@ class SportsDataStore {
         let url = "https://site.api.espn.com/apis/site/v2/sports/\(config.sport)/\(config.league)/scoreboard?dates=\(startDate)-\(endDate)"
 
         do {
+            try Task.checkCancellation()
             let (data, _) = try await URLSession.shared.data(from: URL(string: url)!)
+            try Task.checkCancellation()
             let resp = try JSONDecoder().decode(ESPNResponse.self, from: data)
 
             var pastGames: [(comp: ESPNCompetition, date: Date)] = []
@@ -469,6 +492,8 @@ class SportsDataStore {
             }
 
             espnResults[key] = SportsResult(games: result, error: nil, record: record)
+        } catch is CancellationError {
+            // Keep existing data on cancellation
         } catch {
             espnResults[key] = SportsResult(games: [], error: error.localizedDescription)
         }

@@ -62,17 +62,17 @@ struct WeatherSectionView: View {
     @State private var isLoading = true
     @State private var error: String?
 
+    private var hasData: Bool { !condition.isEmpty }
+
     var body: some View {
         DashboardSection(title: "WEATHER", subtitle: "Prospect, KY", theme: theme) {
-            if isLoading {
-                Text("loading...")
-                    .font(.system(size: 14, design: .monospaced))
-                    .foregroundColor(theme.fgDim)
-            } else if let error {
+            if isLoading && !hasData {
+                LoadingDotsView(theme: theme)
+            } else if let error, !hasData {
                 Text("✗ \(error)")
                     .font(.system(size: 14, design: .monospaced))
                     .foregroundColor(Sol.red)
-            } else {
+            } else if hasData {
                 Button {
                     if let url = URL(string: "carrotweather://") {
                         UIApplication.shared.open(url)
@@ -215,9 +215,11 @@ struct WeatherSectionView: View {
         error = nil
         let isEvening = dashboardMode.activeMode == .evening
         do {
-            let forecastDays = isEvening ? 2 : 1
-            let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(DashboardConfig.lat)&longitude=\(DashboardConfig.lon)&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=precipitation_probability,temperature_2m&temperature_unit=fahrenheit&timezone=America/New_York&forecast_days=\(forecastDays)"
+            try Task.checkCancellation()
+            // Always fetch 2 days so we have data for both modes without re-fetching
+            let urlStr = "https://api.open-meteo.com/v1/forecast?latitude=\(DashboardConfig.lat)&longitude=\(DashboardConfig.lon)&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=precipitation_probability,temperature_2m&temperature_unit=fahrenheit&timezone=America/New_York&forecast_days=2"
             let (data, _) = try await URLSession.shared.data(from: URL(string: urlStr)!)
+            try Task.checkCancellation()
             let resp = try JSONDecoder().decode(WeatherResponse.self, from: data)
             let dayIdx = isEvening ? 1 : 0
             hi = Int(resp.daily.temperature_2m_max[dayIdx].rounded())
@@ -240,6 +242,9 @@ struct WeatherSectionView: View {
             } else {
                 hourlyTemp = allTemp
             }
+            error = nil
+        } catch is CancellationError {
+            // Keep existing data on cancellation
         } catch {
             self.error = error.localizedDescription
         }
