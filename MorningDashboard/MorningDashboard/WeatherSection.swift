@@ -34,15 +34,35 @@ private let wmoConditions: [Int: String] = [
     95: "Thunderstorm", 96: "T-Storm + Hail", 99: "T-Storm + Hail",
 ]
 
-private let wmoIcons: [Int: String] = [
-    0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
-    45: "🌫️", 48: "🌫️",
-    51: "🌦️", 53: "🌦️", 55: "🌧️", 56: "🌧️", 57: "🌧️",
-    61: "🌦️", 63: "🌧️", 65: "🌧️", 66: "🌧️", 67: "🌧️",
-    71: "🌨️", 73: "🌨️", 75: "❄️", 77: "❄️",
-    80: "🌦️", 81: "🌧️", 82: "⛈️",
-    85: "🌨️", 86: "❄️",
-    95: "⛈️", 96: "⛈️", 99: "⛈️",
+private let wmoSFSymbols: [Int: (name: String, color: Color)] = [
+    0: ("sun.max.fill", Sol.orange),
+    1: ("sun.min.fill", Sol.orange),
+    2: ("cloud.sun.fill", Sol.yellow),
+    3: ("cloud.fill", Sol.base01),
+    45: ("cloud.fog.fill", Sol.base01),
+    48: ("cloud.fog.fill", Sol.base01),
+    51: ("cloud.drizzle.fill", Sol.cyan),
+    53: ("cloud.drizzle.fill", Sol.cyan),
+    55: ("cloud.drizzle.fill", Sol.blue),
+    56: ("cloud.sleet.fill", Sol.violet),
+    57: ("cloud.sleet.fill", Sol.violet),
+    61: ("cloud.rain.fill", Sol.cyan),
+    63: ("cloud.rain.fill", Sol.blue),
+    65: ("cloud.heavyrain.fill", Sol.blue),
+    66: ("cloud.sleet.fill", Sol.violet),
+    67: ("cloud.sleet.fill", Sol.violet),
+    71: ("cloud.snow.fill", Sol.cyan),
+    73: ("cloud.snow.fill", Sol.blue),
+    75: ("snowflake", Sol.blue),
+    77: ("snowflake", Sol.cyan),
+    80: ("cloud.rain.fill", Sol.cyan),
+    81: ("cloud.rain.fill", Sol.blue),
+    82: ("cloud.bolt.rain.fill", Sol.violet),
+    85: ("cloud.snow.fill", Sol.blue),
+    86: ("snowflake", Sol.blue),
+    95: ("cloud.bolt.fill", Sol.violet),
+    96: ("cloud.bolt.rain.fill", Sol.red),
+    99: ("cloud.bolt.rain.fill", Sol.red),
 ]
 
 // MARK: - View
@@ -55,7 +75,8 @@ struct WeatherSectionView: View {
     @State private var hi = 0
     @State private var lo = 0
     @State private var condition = ""
-    @State private var icon = ""
+    @State private var iconName = ""
+    @State private var iconColor: Color = Sol.base01
     @State private var rainMax = 0
     @State private var hourlyRain: [Int] = []
     @State private var hourlyTemp: [Double] = []
@@ -92,7 +113,10 @@ struct WeatherSectionView: View {
     private var weatherContent: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .center, spacing: 12) {
-                Text(icon).font(.system(size: 42))
+                Image(systemName: iconName)
+                    .font(.system(size: 36))
+                    .foregroundColor(iconColor)
+                    .frame(width: 44, height: 44)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(condition)
                         .font(.system(size: 16, design: .monospaced))
@@ -221,7 +245,9 @@ struct WeatherSectionView: View {
             lo = Int(resp.daily.temperature_2m_min[dayIdx].rounded())
             let code = resp.daily.weathercode[dayIdx]
             condition = wmoConditions[code] ?? "Unknown"
-            icon = wmoIcons[code] ?? "?"
+            let symbol = wmoSFSymbols[code]
+            iconName = symbol?.name ?? "questionmark.circle"
+            iconColor = symbol?.color ?? Sol.base01
             rainMax = resp.daily.precipitation_probability_max[dayIdx]
             // Hourly data: each day has 24 hours. In evening mode, use hours 24-47 (tomorrow).
             let hourlyOffset = isEvening ? 24 : 0
