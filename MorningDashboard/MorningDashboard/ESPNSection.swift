@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Config
 
 struct ESPNTeamConfig {
+    let id: String
     let sport: String
     let league: String
     let teamId: String
@@ -17,21 +18,25 @@ struct ESPNTeamConfig {
     }
 
     static let lakers = ESPNTeamConfig(
+        id: "lakers",
         sport: "basketball", league: "nba",
         teamId: "13", teamAbbr: "LAL", teamColor: Sol.violet,
         sectionTitle: "LAKERS", sectionSubtitle: "Los Angeles", mode: .daily
     )
     static let dolphins = ESPNTeamConfig(
+        id: "dolphins",
         sport: "football", league: "nfl",
         teamId: "15", teamAbbr: "MIA", teamColor: Sol.cyan,
         sectionTitle: "DOLPHINS", sectionSubtitle: "Miami", mode: .weekly
     )
     static let ukBasketball = ESPNTeamConfig(
+        id: "uk-basketball",
         sport: "basketball", league: "mens-college-basketball",
         teamId: "96", teamAbbr: "UK", teamColor: Sol.blue,
         sectionTitle: "KY WILDCATS", sectionSubtitle: "Basketball", mode: .weekly
     )
     static let ukFootball = ESPNTeamConfig(
+        id: "uk-football",
         sport: "football", league: "college-football",
         teamId: "96", teamAbbr: "UK", teamColor: Sol.blue,
         sectionTitle: "KY WILDCATS", sectionSubtitle: "Football", mode: .weekly

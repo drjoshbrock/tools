@@ -265,7 +265,7 @@ class SportsDataStore {
     // MARK: - ESPN Loading
 
     private func loadESPN(_ config: ESPNTeamConfig, mode: DashboardModeType = .morning) async {
-        let key = config.sectionTitle
+        let key = config.id
         switch config.mode {
         case .daily:
             await loadESPNDaily(config, key: key, mode: mode)

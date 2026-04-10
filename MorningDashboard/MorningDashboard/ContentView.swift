@@ -69,8 +69,8 @@ struct ContentView: View {
                 }
 
                 ForEach([ESPNTeamConfig.lakers, .dolphins, .ukBasketball, .ukFootball],
-                        id: \.sectionTitle) { config in
-                    let result = sportsStore.espnResults[config.sectionTitle]
+                        id: \.id) { config in
+                    let result = sportsStore.espnResults[config.id]
                     if let result, !result.games.isEmpty || result.error != nil {
                         ESPNSectionView(config: config, games: result.games,
                                         error: result.error, theme: theme)
