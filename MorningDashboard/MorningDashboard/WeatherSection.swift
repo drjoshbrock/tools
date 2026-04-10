@@ -122,74 +122,84 @@ struct WeatherSectionView: View {
         }
     }
 
-    private let chartSize: CGFloat = 24
+    private let chartHeight: CGFloat = 36
+    private let chartTimeLabels: [(pos: Int, label: String)] = [
+        (0, "6a"), (3, "9a"), (6, "12p"), (9, "3p"), (12, "6p"), (15, "9p")
+    ]
 
-    private var chartLabelRow: Text {
-        let labels: [(Int, String)] = [(0, "6a"), (3, "9a"), (6, "12p"), (9, "3p"), (12, "6p"), (15, "9p")]
-        var chars = Array(repeating: " ", count: 18)
-        for (pos, label) in labels {
-            for (j, ch) in label.enumerated() {
-                if pos + j < 18 { chars[pos + j] = String(ch) }
+    private func chartLabelsRow(count: Int) -> some View {
+        GeometryReader { geo in
+            let colWidth = geo.size.width / CGFloat(count)
+            ForEach(Array(chartTimeLabels.enumerated()), id: \.offset) { _, item in
+                Text(item.label)
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(theme.fgDim)
+                    .fixedSize()
+                    .position(x: colWidth * (CGFloat(item.pos) + 0.5), y: 7)
             }
         }
-        return Text(chars.joined()).foregroundColor(theme.fgDim)
-    }
-
-    private func rainBarRow(_ slice: [Int]) -> Text {
-        let blocks: [Character] = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
-        var result = Text("")
-        for pct in slice {
-            let idx = min(8, Int((Double(pct) / 100.0 * 8).rounded()))
-            let color: Color = pct > 60 ? Sol.red : pct > 40 ? Sol.orange : pct > 20 ? Sol.orange : Sol.green
-            result = result + Text(String(blocks[idx])).foregroundColor(color)
-        }
-        return result
-    }
-
-    private func tempBarRow(_ slice: [Double]) -> Text {
-        let blocks: [Character] = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
-        let minT = slice.min() ?? 0
-        let maxT = slice.max() ?? 100
-        let range = max(maxT - minT, 1)
-        var result = Text("")
-        for t in slice {
-            let norm = (t - minT) / range
-            let idx = min(8, Int((norm * 8).rounded()))
-            let color: Color = t > 90 ? Sol.red : t > 75 ? Sol.orange : t > 55 ? Sol.magenta : Sol.cyan
-            result = result + Text(String(blocks[idx])).foregroundColor(color)
-        }
-        return result
+        .frame(height: 14)
     }
 
     @ViewBuilder
-    private var rainBox: some View {
-        let slice = Array(hourlyRain[6...23])
+    private var tempBox: some View {
+        let slice = Array(hourlyTemp[6...23])
+        let minT = slice.min() ?? 0
+        let maxT = slice.max() ?? 100
+        let range = max(maxT - minT, 1)
 
-        VStack(alignment: .leading, spacing: 2) {
-            Text("HOURLY RAIN %")
+        VStack(alignment: .leading, spacing: 4) {
+            Text("HOURLY TEMP °F")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
-            rainBarRow(slice)
-                .font(.system(size: chartSize, design: .monospaced))
-            chartLabelRow
-                .font(.system(size: chartSize, design: .monospaced))
+
+            HStack(spacing: 0) {
+                ForEach(0..<slice.count, id: \.self) { i in
+                    let t = slice[i]
+                    let norm = (t - minT) / range
+                    let level = min(8, Int((norm * 8).rounded()))
+                    let color: Color = t > 90 ? Sol.red : t > 75 ? Sol.orange : t > 55 ? Sol.magenta : Sol.cyan
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        Rectangle().fill(color)
+                            .frame(height: chartHeight * CGFloat(level) / 8.0)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: chartHeight)
+                }
+            }
+
+            chartLabelsRow(count: slice.count)
         }
         .padding(8)
         .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
     }
 
     @ViewBuilder
-    private var tempBox: some View {
-        let slice = Array(hourlyTemp[6...23])
+    private var rainBox: some View {
+        let slice = Array(hourlyRain[6...23])
 
-        VStack(alignment: .leading, spacing: 2) {
-            Text("HOURLY TEMP °F")
+        VStack(alignment: .leading, spacing: 4) {
+            Text("HOURLY RAIN %")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
-            tempBarRow(slice)
-                .font(.system(size: chartSize, design: .monospaced))
-            chartLabelRow
-                .font(.system(size: chartSize, design: .monospaced))
+
+            HStack(spacing: 0) {
+                ForEach(0..<slice.count, id: \.self) { i in
+                    let pct = slice[i]
+                    let level = min(8, Int((Double(pct) / 100.0 * 8).rounded()))
+                    let color: Color = pct > 60 ? Sol.red : pct > 40 ? Sol.orange : pct > 20 ? Sol.orange : Sol.green
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        Rectangle().fill(color)
+                            .frame(height: chartHeight * CGFloat(level) / 8.0)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: chartHeight)
+                }
+            }
+
+            chartLabelsRow(count: slice.count)
         }
         .padding(8)
         .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
