@@ -60,8 +60,6 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 TitleBarView(theme: theme, refreshTrigger: refreshTrigger)
 
-                SummarySectionView(theme: theme, sportsStore: sportsStore)
-
                 WeatherSectionView(theme: theme, refreshTrigger: refreshTrigger)
                 CalendarSectionView(theme: theme, refreshTrigger: refreshTrigger)
 
