@@ -5,6 +5,8 @@ import SwiftUI
 struct RedsSectionView: View {
     let games: [RedsGameType]
     let error: String?
+    let record: String?
+    let standings: [NLCentralTeam]
     let theme: Theme
 
     var body: some View {
@@ -13,7 +15,7 @@ struct RedsSectionView: View {
                 UIApplication.shared.open(url)
             }
         } label: {
-            DashboardSection(title: "REDS", subtitle: "Cincinnati", theme: theme) {
+            DashboardSection(title: "REDS", subtitle: "Cincinnati", record: record, theme: theme) {
                 if let error {
                     Text("✗ \(error)")
                         .font(.system(size: 14, design: .monospaced))
@@ -25,10 +27,66 @@ struct RedsSectionView: View {
                         }
                     }
                 }
+                standingsChart
             }
         }
         .buttonStyle(.plain)
     }
+
+    // MARK: - NL Central Standings Chart
+
+    @ViewBuilder
+    private var standingsChart: some View {
+        if !standings.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("NL CENTRAL")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(theme.fgDim)
+                    .padding(.bottom, 2)
+
+                ForEach(standings, id: \.abbr) { team in
+                    standingsRow(team)
+                }
+            }
+            .padding(10)
+            .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
+            .padding(.top, 10)
+        }
+    }
+
+    private func standingsRow(_ team: NLCentralTeam) -> some View {
+        HStack(spacing: 6) {
+            Text(team.abbr)
+                .font(.system(size: 13, design: .monospaced))
+                .fontWeight(team.isReds ? .bold : .regular)
+                .foregroundColor(team.color)
+                .frame(width: 30, alignment: .leading)
+
+            GeometryReader { geo in
+                let maxWins = standings.first?.wins ?? 1
+                let barWidth = geo.size.width * CGFloat(team.wins) / CGFloat(max(maxWins, 1))
+                ZStack(alignment: .leading) {
+                    Rectangle().fill(theme.bgHighlight)
+                        .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
+                    Rectangle().fill(team.color.opacity(team.isReds ? 1.0 : 0.6))
+                        .frame(width: barWidth)
+                }
+            }
+            .frame(height: 14)
+
+            Text("\(team.wins)-\(team.losses)")
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundColor(team.isReds ? team.color : theme.fg)
+                .frame(width: 48, alignment: .trailing)
+
+            Text(team.gamesBack)
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundColor(team.rank == 1 ? Sol.green : theme.fgDim)
+                .frame(width: 36, alignment: .trailing)
+        }
+    }
+
+    // MARK: - Game Views
 
     @ViewBuilder
     private func gameView(_ game: RedsGameType) -> some View {

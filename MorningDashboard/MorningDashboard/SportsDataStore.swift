@@ -58,6 +58,25 @@ struct MLBLinescore: Codable {
     let inningHalf: String?
 }
 
+// MARK: - MLB Standings API Models
+
+struct MLBStandingsResponse: Codable {
+    let records: [MLBStandingsRecord]?
+}
+
+struct MLBStandingsRecord: Codable {
+    let teamRecords: [MLBTeamRecord]?
+}
+
+struct MLBTeamRecord: Codable {
+    let team: MLBTeamInfo
+    let wins: Int
+    let losses: Int
+    let divisionRank: String?
+    let gamesBack: String?
+    let winningPercentage: String?
+}
+
 // MARK: - ESPN API Models
 
 struct ESPNResponse: Codable {
@@ -80,6 +99,12 @@ struct ESPNCompetitor: Codable {
     let team: ESPNTeam
     let score: String?
     let homeAway: String?
+    let records: [ESPNRecord]?
+}
+
+struct ESPNRecord: Codable {
+    let type: String?
+    let summary: String?
 }
 
 struct ESPNTeam: Codable {
@@ -148,6 +173,17 @@ enum ESPNGameInfo {
 struct SportsResult<T> {
     var games: [T] = []
     var error: String?
+    var record: String?
+}
+
+struct NLCentralTeam {
+    let abbr: String
+    let wins: Int
+    let losses: Int
+    let gamesBack: String
+    let rank: Int
+    let color: Color
+    let isReds: Bool
 }
 
 // MARK: - Data Store
@@ -155,11 +191,14 @@ struct SportsResult<T> {
 @Observable
 class SportsDataStore {
     var reds = SportsResult<RedsGameType>()
+    var redsRecord: String?
     var espnResults: [String: SportsResult<ESPNGameInfo>] = [:]
+    var nlCentralStandings: [NLCentralTeam] = []
 
     func loadAll(mode: DashboardModeType = .morning) async {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await self.loadReds(mode: mode) }
+            group.addTask { await self.loadNLCentralStandings() }
             group.addTask { await self.loadESPN(.lakers, mode: mode) }
             group.addTask { await self.loadESPN(.dolphins, mode: mode) }
             group.addTask { await self.loadESPN(.ukBasketball, mode: mode) }
@@ -262,6 +301,60 @@ class SportsDataStore {
         }
     }
 
+    // MARK: - NL Central Standings
+
+    private let nlCentralColors: [String: (color: Color, abbr: String)] = [
+        "Cincinnati Reds": (Sol.red, "CIN"),
+        "St. Louis Cardinals": (Sol.magenta, "STL"),
+        "Chicago Cubs": (Sol.blue, "CHC"),
+        "Milwaukee Brewers": (Sol.cyan, "MIL"),
+        "Pittsburgh Pirates": (Sol.orange, "PIT"),
+    ]
+
+    private func loadNLCentralStandings() async {
+        let year = Calendar.current.component(.year, from: Date())
+        let urlStr = "https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=\(year)&standingsTypes=regularSeason&divisionId=205"
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: URL(string: urlStr)!)
+            let resp = try JSONDecoder().decode(MLBStandingsResponse.self, from: data)
+
+            var teams: [NLCentralTeam] = []
+
+            if let records = resp.records?.first?.teamRecords {
+                for tr in records {
+                    let name = tr.team.name
+                    let info = nlCentralColors[name]
+                    let abbr = info?.abbr ?? mlbAbbr(name)
+                    let color = info?.color ?? Sol.base01
+                    let isReds = tr.team.id == DashboardConfig.redsId
+                    let rank = Int(tr.divisionRank ?? "0") ?? 0
+                    let gb = tr.gamesBack ?? "-"
+                    let gbDisplay = gb == "-" ? "—" : gb
+
+                    teams.append(NLCentralTeam(
+                        abbr: abbr,
+                        wins: tr.wins,
+                        losses: tr.losses,
+                        gamesBack: gbDisplay,
+                        rank: rank,
+                        color: color,
+                        isReds: isReds
+                    ))
+
+                    if isReds {
+                        redsRecord = "\(tr.wins)-\(tr.losses)"
+                    }
+                }
+            }
+
+            teams.sort { $0.rank < $1.rank }
+            nlCentralStandings = teams
+        } catch {
+            nlCentralStandings = []
+        }
+    }
+
     // MARK: - ESPN Loading
 
     private func loadESPN(_ config: ESPNTeamConfig, mode: DashboardModeType = .morning) async {
@@ -294,17 +387,20 @@ class SportsDataStore {
             let resp2 = try JSONDecoder().decode(ESPNResponse.self, from: bytes2)
 
             var result: [ESPNGameInfo] = []
+            var record: String?
 
             if let comp = findTeamGame(in: resp1, teamId: config.teamId),
-               let info = buildGameInfo(comp, config: config, label: label1) {
-                result.append(info)
+               let built = buildGameInfo(comp, config: config, label: label1) {
+                result.append(built.game)
+                record = record ?? built.record
             }
             if let comp = findTeamGame(in: resp2, teamId: config.teamId),
-               let info = buildGameInfo(comp, config: config, label: label2) {
-                result.append(info)
+               let built = buildGameInfo(comp, config: config, label: label2) {
+                result.append(built.game)
+                record = record ?? built.record
             }
 
-            espnResults[key] = SportsResult(games: result, error: nil)
+            espnResults[key] = SportsResult(games: result, error: nil, record: record)
         } catch {
             espnResults[key] = SportsResult(games: [], error: error.localizedDescription)
         }
@@ -343,13 +439,15 @@ class SportsDataStore {
             futureGames.sort { $0.date < $1.date }
 
             var result: [ESPNGameInfo] = []
+            var record: String?
             let now = Date()
 
             if let pg = pastGames.first {
                 let daysAgo = Int(round(now.timeIntervalSince(pg.date) / 86400))
                 let label = daysAgo <= 1 ? "YESTERDAY" : "\(daysAgo) DAYS AGO"
-                if let info = buildGameInfo(pg.comp, config: config, label: label) {
-                    result.append(info)
+                if let built = buildGameInfo(pg.comp, config: config, label: label) {
+                    result.append(built.game)
+                    record = record ?? built.record
                 }
             }
 
@@ -364,12 +462,13 @@ class SportsDataStore {
                     df.dateFormat = "EEE MMM d"
                     label = df.string(from: fg.date).uppercased()
                 }
-                if let info = buildGameInfo(fg.comp, config: config, label: label) {
-                    result.append(info)
+                if let built = buildGameInfo(fg.comp, config: config, label: label) {
+                    result.append(built.game)
+                    record = record ?? built.record
                 }
             }
 
-            espnResults[key] = SportsResult(games: result, error: nil)
+            espnResults[key] = SportsResult(games: result, error: nil, record: record)
         } catch {
             espnResults[key] = SportsResult(games: [], error: error.localizedDescription)
         }
@@ -386,7 +485,7 @@ class SportsDataStore {
         return nil
     }
 
-    private func buildGameInfo(_ comp: ESPNCompetition, config: ESPNTeamConfig, label: String) -> ESPNGameInfo? {
+    private func buildGameInfo(_ comp: ESPNCompetition, config: ESPNTeamConfig, label: String) -> (game: ESPNGameInfo, record: String?)? {
         guard let competitors = comp.competitors,
               let my = competitors.first(where: { $0.team.id == config.teamId }),
               let opp = competitors.first(where: { $0.team.id != config.teamId }) else {
@@ -396,18 +495,19 @@ class SportsDataStore {
         let st = comp.status?.type
         let isHome = my.homeAway == "home"
         let venue = comp.venue?.fullName ?? ""
+        let record = my.records?.first(where: { $0.type == "total" })?.summary
 
         if st?.completed == true {
             let myS = Int(my.score ?? "0") ?? 0
             let oppS = Int(opp.score ?? "0") ?? 0
-            return .final_(label: label, myAbbr: config.teamAbbr, myColor: config.teamColor,
-                           myScore: myS, oppAbbr: oppA, oppScore: oppS, venue: venue, isHome: isHome)
+            return (.final_(label: label, myAbbr: config.teamAbbr, myColor: config.teamColor,
+                           myScore: myS, oppAbbr: oppA, oppScore: oppS, venue: venue, isHome: isHome), record)
         } else if st?.state == "in" {
             let myS = Int(my.score ?? "0") ?? 0
             let oppS = Int(opp.score ?? "0") ?? 0
-            return .live(myAbbr: config.teamAbbr, myColor: config.teamColor,
+            return (.live(myAbbr: config.teamAbbr, myColor: config.teamColor,
                          myScore: myS, oppAbbr: oppA, oppScore: oppS,
-                         detail: st?.shortDetail ?? "")
+                         detail: st?.shortDetail ?? ""), record)
         } else {
             let vs = isHome ? "vs" : "@"
             let gameDate = parseISO8601(comp.date ?? "")
@@ -416,9 +516,9 @@ class SportsDataStore {
             timeFmt.dateFormat = "h:mm a"
             let time = timeFmt.string(from: gameDate) + " ET"
             let odds = comp.odds?.first?.details
-            return .upcoming(myAbbr: config.teamAbbr, myColor: config.teamColor,
+            return (.upcoming(myAbbr: config.teamAbbr, myColor: config.teamColor,
                              oppAbbr: oppA, vs: vs, time: time, venue: venue,
-                             odds: odds, label: "UPCOMING")
+                             odds: odds, label: "UPCOMING"), record)
         }
     }
 }

@@ -63,9 +63,13 @@ struct ContentView: View {
                 WeatherSectionView(theme: theme, refreshTrigger: refreshTrigger)
                 CalendarSectionView(theme: theme, refreshTrigger: refreshTrigger)
 
-                if !sportsStore.reds.games.isEmpty || sportsStore.reds.error != nil {
+                if !sportsStore.reds.games.isEmpty || sportsStore.reds.error != nil
+                    || !sportsStore.nlCentralStandings.isEmpty {
                     RedsSectionView(games: sportsStore.reds.games,
-                                    error: sportsStore.reds.error, theme: theme)
+                                    error: sportsStore.reds.error,
+                                    record: sportsStore.redsRecord,
+                                    standings: sportsStore.nlCentralStandings,
+                                    theme: theme)
                 }
 
                 ForEach([ESPNTeamConfig.lakers, .dolphins, .ukBasketball, .ukFootball],
@@ -73,7 +77,8 @@ struct ContentView: View {
                     let result = sportsStore.espnResults[config.id]
                     if let result, !result.games.isEmpty || result.error != nil {
                         ESPNSectionView(config: config, games: result.games,
-                                        error: result.error, theme: theme)
+                                        error: result.error,
+                                        record: result.record, theme: theme)
                     }
                 }
 
@@ -162,8 +167,18 @@ struct TitleBarView: View {
 struct DashboardSection<Content: View>: View {
     let title: String
     let subtitle: String
+    let record: String?
     let theme: Theme
     @ViewBuilder let content: () -> Content
+
+    init(title: String, subtitle: String, record: String? = nil,
+         theme: Theme, @ViewBuilder content: @escaping () -> Content) {
+        self.title = title
+        self.subtitle = subtitle
+        self.record = record
+        self.theme = theme
+        self.content = content
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -175,6 +190,11 @@ struct DashboardSection<Content: View>: View {
                     .fontWeight(.bold)
                     .foregroundColor(Sol.blue)
                     .tracking(1)
+                if let record {
+                    Text("(\(record))")
+                        .font(.system(size: 13, design: .monospaced))
+                        .foregroundColor(Sol.green)
+                }
                 Spacer()
                 Text(subtitle)
                     .font(.system(size: 14, design: .monospaced))

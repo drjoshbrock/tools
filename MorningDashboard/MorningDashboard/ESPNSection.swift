@@ -54,6 +54,7 @@ struct ESPNSectionView: View {
     let config: ESPNTeamConfig
     let games: [ESPNGameInfo]
     let error: String?
+    let record: String?
     let theme: Theme
 
     var body: some View {
@@ -62,7 +63,7 @@ struct ESPNSectionView: View {
                 UIApplication.shared.open(url)
             }
         } label: {
-            DashboardSection(title: config.sectionTitle, subtitle: config.sectionSubtitle, theme: theme) {
+            DashboardSection(title: config.sectionTitle, subtitle: config.sectionSubtitle, record: record, theme: theme) {
                 if let error {
                     Text("✗ \(error)")
                         .font(.system(size: 14, design: .monospaced))
