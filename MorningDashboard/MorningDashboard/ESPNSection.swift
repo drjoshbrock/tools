@@ -12,6 +12,7 @@ struct ESPNTeamConfig {
     let sectionTitle: String
     let sectionSubtitle: String
     let mode: Mode
+    let teamURL: String
 
     enum Mode {
         case daily, weekly
@@ -21,25 +22,29 @@ struct ESPNTeamConfig {
         id: "lakers",
         sport: "basketball", league: "nba",
         teamId: "13", teamAbbr: "LAL", teamColor: Sol.violet,
-        sectionTitle: "LAKERS", sectionSubtitle: "Los Angeles", mode: .daily
+        sectionTitle: "LAKERS", sectionSubtitle: "Los Angeles", mode: .daily,
+        teamURL: "https://www.espn.com/nba/team/_/name/lal/los-angeles-lakers"
     )
     static let dolphins = ESPNTeamConfig(
         id: "dolphins",
         sport: "football", league: "nfl",
         teamId: "15", teamAbbr: "MIA", teamColor: Sol.cyan,
-        sectionTitle: "DOLPHINS", sectionSubtitle: "Miami", mode: .weekly
+        sectionTitle: "DOLPHINS", sectionSubtitle: "Miami", mode: .weekly,
+        teamURL: "https://www.espn.com/nfl/team/_/name/mia/miami-dolphins"
     )
     static let ukBasketball = ESPNTeamConfig(
         id: "uk-basketball",
         sport: "basketball", league: "mens-college-basketball",
         teamId: "96", teamAbbr: "UK", teamColor: Sol.blue,
-        sectionTitle: "KY WILDCATS", sectionSubtitle: "Basketball", mode: .weekly
+        sectionTitle: "KY WILDCATS", sectionSubtitle: "Basketball", mode: .weekly,
+        teamURL: "https://www.espn.com/mens-college-basketball/team/_/id/96/kentucky-wildcats"
     )
     static let ukFootball = ESPNTeamConfig(
         id: "uk-football",
         sport: "football", league: "college-football",
         teamId: "96", teamAbbr: "UK", teamColor: Sol.blue,
-        sectionTitle: "KY WILDCATS", sectionSubtitle: "Football", mode: .weekly
+        sectionTitle: "KY WILDCATS", sectionSubtitle: "Football", mode: .weekly,
+        teamURL: "https://www.espn.com/college-football/team/_/id/96/kentucky-wildcats"
     )
 }
 
@@ -53,7 +58,7 @@ struct ESPNSectionView: View {
 
     var body: some View {
         Button {
-            if let url = URL(string: "sportscenter://") {
+            if let url = URL(string: config.teamURL) {
                 UIApplication.shared.open(url)
             }
         } label: {
