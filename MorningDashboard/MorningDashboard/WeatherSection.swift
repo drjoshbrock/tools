@@ -122,7 +122,7 @@ struct WeatherSectionView: View {
         }
     }
 
-    private let chartSize: CGFloat = 14
+    private let chartSize: CGFloat = 24
 
     private var chartLabelRow: Text {
         let labels: [(Int, String)] = [(0, "6a"), (3, "9a"), (6, "12p"), (9, "3p"), (12, "6p"), (15, "9p")]
