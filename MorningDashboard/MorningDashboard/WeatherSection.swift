@@ -122,34 +122,46 @@ struct WeatherSectionView: View {
         }
     }
 
+    private let chartFont: CGFloat = 24
+    private let labelFont: CGFloat = 12
+    private let chartTracking: CGFloat = 2
+    private let chartSpacing: CGFloat = 1
+    private let timeLabels: [(Int, String)] = [(0, "6a"), (3, "9a"), (6, "12p"), (9, "3p"), (12, "6p"), (15, "9p")]
+
     @ViewBuilder
     private var rainBox: some View {
         let blocks: [Character] = [" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+        let slice = Array(hourlyRain[6...23])
 
-        VStack(alignment: .leading, spacing: 2) {
-            Text("┌─ HOURLY RAIN % ─────────────────┐")
+        VStack(alignment: .leading, spacing: 4) {
+            Text("HOURLY RAIN %")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
 
-            HStack(spacing: 0) {
-                ForEach(6...23, id: \.self) { i in
-                    let pct = hourlyRain[i]
+            HStack(spacing: chartSpacing) {
+                ForEach(0..<slice.count, id: \.self) { i in
+                    let pct = slice[i]
                     let idx = min(8, Int((Double(pct) / 100.0 * 8).rounded()))
                     let color: Color = pct > 60 ? Sol.red : pct > 40 ? Sol.orange : pct > 20 ? Sol.orange : Sol.green
                     Text(String(blocks[idx]))
                         .foregroundColor(color)
                 }
             }
-            .font(.system(size: 16, design: .monospaced))
-            .tracking(1)
-
-            Text("6a    9a    12p   3p    6p    9p")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(theme.fgDim)
-
-            Text("└─────────────────────────────────┘")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(theme.fgDim)
+            .font(.system(size: chartFont, design: .monospaced))
+            .tracking(chartTracking)
+            .overlay(alignment: .bottomLeading) {
+                GeometryReader { geo in
+                    let barWidth = geo.size.width / CGFloat(slice.count)
+                    ForEach(timeLabels, id: \.0) { idx, label in
+                        Text(label)
+                            .font(.system(size: labelFont, design: .monospaced))
+                            .foregroundColor(theme.fgDim)
+                            .position(x: barWidth * (CGFloat(idx) + 0.5),
+                                      y: geo.size.height + 10)
+                    }
+                }
+            }
+            .padding(.bottom, 16)
         }
         .padding(8)
         .overlay(Rectangle().stroke(theme.border, lineWidth: 1))
@@ -162,14 +174,13 @@ struct WeatherSectionView: View {
         let minT = slice.min() ?? 0
         let maxT = slice.max() ?? 100
         let range = max(maxT - minT, 1)
-        let timeLabels: [(Int, String)] = [(0, "6a"), (3, "9a"), (6, "12p"), (9, "3p"), (12, "6p"), (15, "9p")]
 
         VStack(alignment: .leading, spacing: 4) {
             Text("HOURLY TEMP °F")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(theme.fgDim)
 
-            HStack(spacing: 1) {
+            HStack(spacing: chartSpacing) {
                 ForEach(0..<slice.count, id: \.self) { i in
                     let t = slice[i]
                     let norm = (t - minT) / range
@@ -179,14 +190,14 @@ struct WeatherSectionView: View {
                         .foregroundColor(color)
                 }
             }
-            .font(.system(size: 24, design: .monospaced))
-            .tracking(2)
+            .font(.system(size: chartFont, design: .monospaced))
+            .tracking(chartTracking)
             .overlay(alignment: .bottomLeading) {
                 GeometryReader { geo in
                     let barWidth = geo.size.width / CGFloat(slice.count)
                     ForEach(timeLabels, id: \.0) { idx, label in
                         Text(label)
-                            .font(.system(size: 10, design: .monospaced))
+                            .font(.system(size: labelFont, design: .monospaced))
                             .foregroundColor(theme.fgDim)
                             .position(x: barWidth * (CGFloat(idx) + 0.5),
                                       y: geo.size.height + 10)
