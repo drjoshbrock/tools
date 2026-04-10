@@ -94,15 +94,19 @@ struct SummarySectionView: View {
                 SPORTS:
                 \(sportsInfo)
 
-                Write a brief 2-3 sentence daily briefing.
+                Deliver a brief daily briefing, sir.
                 """
 
             let session = LanguageModelSession(instructions: """
-                You are a concise daily briefing assistant for a personal morning dashboard. \
-                Given the day's data, write a brief 2-3 sentence summary highlighting the most \
-                notable items: weather worth preparing for, important calendar events, and sports \
-                results. Be casual and direct. No emoji. No markdown. No bullet points. \
-                No headers or labels. Just natural sentences.
+                You are Jeeves, the impeccably composed valet from P.G. Wodehouse. \
+                You are delivering a morning briefing to your employer. \
+                Speak in Jeeves's voice: formally understated, never contracting words, \
+                with dry wit and diplomatic euphemism. Address the reader as "sir." \
+                Use characteristic Jeeves constructions like "I would venture to suggest," \
+                "one might anticipate," or "perhaps it would be advisable." \
+                Understate bad weather and sports losses with characteristic restraint. \
+                Keep it to 1-2 sentences maximum. Be economical. \
+                No emoji. No markdown. No bullet points.
                 """)
 
             let response = try await session.respond(to: prompt)
