@@ -9,8 +9,8 @@
 		<string>carrotweather</string>
 	</array>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Morning Dashboard needs access to your calendars to display today's events.</string>
+	<string>Horizon needs access to your calendars to display today's events.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Morning Dashboard needs access to your calendars to display today's events.</string>
+	<string>Horizon needs access to your calendars to display today's events.</string>
 </dict>
 </plist>

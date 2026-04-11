@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct MorningDashboardApp: App {
+struct HorizonApp: App {
     @State private var dashboardMode = DashboardMode()
 
     var body: some Scene {
