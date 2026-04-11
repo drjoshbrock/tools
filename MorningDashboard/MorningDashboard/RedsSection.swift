@@ -11,9 +11,7 @@ struct RedsSectionView: View {
 
     var body: some View {
         Button {
-            if let url = URL(string: "https://www.mlb.com/reds") {
-                UIApplication.shared.open(url)
-            }
+            openLink(appScheme: "mlbatbat://", webURL: "https://www.mlb.com/reds")
         } label: {
             DashboardSection(title: "REDS", subtitle: "Cincinnati", record: record, theme: theme) {
                 if let error {

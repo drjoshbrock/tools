@@ -95,9 +95,7 @@ struct WeatherSectionView: View {
                     .foregroundColor(Sol.red)
             } else if hasData {
                 Button {
-                    if let url = URL(string: "carrotweather://") {
-                        UIApplication.shared.open(url)
-                    }
+                    openLink(appScheme: "carrotweather://", webURL: "https://weather.com")
                 } label: {
                     weatherContent
                 }

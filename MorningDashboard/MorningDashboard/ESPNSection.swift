@@ -59,9 +59,7 @@ struct ESPNSectionView: View {
 
     var body: some View {
         Button {
-            if let url = URL(string: config.teamURL) {
-                UIApplication.shared.open(url)
-            }
+            openLink(appScheme: "sportscenter://", webURL: config.teamURL)
         } label: {
             DashboardSection(title: config.sectionTitle, subtitle: config.sectionSubtitle, record: record, theme: theme) {
                 if let error {

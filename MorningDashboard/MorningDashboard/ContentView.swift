@@ -43,6 +43,15 @@ func parseISO8601(_ string: String) -> Date {
     return f.date(from: string) ?? Date()
 }
 
+func openLink(appScheme: String, webURL: String) {
+    if let appURL = URL(string: appScheme),
+       UIApplication.shared.canOpenURL(appURL) {
+        UIApplication.shared.open(appURL)
+    } else if let url = URL(string: webURL) {
+        UIApplication.shared.open(url)
+    }
+}
+
 // MARK: - Content View
 
 struct ContentView: View {
