@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>WFWorkflowActions</key>
+    <array>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.comment</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>WFCommentActionText</key>
+                <string>Morning Dashboard — Gathers calendar events, then displays a dashboard with weather, calendar, and sports data via Quick Look HTML.</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.filter.calendarevents</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>UUID</key>
+                <string>5393CB48-EE4D-4869-8B1F-04FDBFF36AE7</string>
+                <key>WFContentItemSortOrder</key>
+                <string>Oldest First</string>
+                <key>WFContentItemSortProperty</key>
+                <string>Start Date</string>
+                <key>WFContentItemFilter</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>WFActionParameterFilterPrefix</key>
+                        <integer>1</integer>
+                        <key>WFContentPredicateBoundedDate</key>
+                        <false/>
+                        <key>WFActionParameterFilterTemplates</key>
+                        <array>
+                            <dict>
+                                <key>Operator</key>
+                                <integer>1002</integer>
+                                <key>Property</key>
+                                <string>Start Date</string>
+                                <key>Removable</key>
+                                <true/>
+                            </dict>
+                        </array>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFContentPredicateTableTemplate</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.repeat.each</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>UUID</key>
+                <string>EE341D6D-63B4-4EB4-B828-320592C19503</string>
+                <key>GroupingIdentifier</key>
+                <string>42FC09BD-1F6B-4417-906F-5F99B88C2F86</string>
+                <key>WFControlFlowMode</key>
+                <integer>0</integer>
+                <key>WFInput</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>OutputName</key>
+                        <string>Calendar Events</string>
+                        <key>OutputUUID</key>
+                        <string>5393CB48-EE4D-4869-8B1F-04FDBFF36AE7</string>
+                        <key>Type</key>
+                        <string>ActionOutput</string>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFTextTokenAttachment</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.formatdate</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>UUID</key>
+                <string>3FF73842-DAC1-4C30-A1AA-50AF112FF61F</string>
+                <key>WFDateFormatStyle</key>
+                <string>Custom</string>
+                <key>WFDateFormat</key>
+                <string>h:mm a</string>
+                <key>WFDate</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>Aggrandizements</key>
+                        <array>
+                            <dict>
+                                <key>PropertyName</key>
+                                <string>Start Date</string>
+                                <key>Type</key>
+                                <string>WFPropertyVariableAggrandizement</string>
+                            </dict>
+                        </array>
+                        <key>OutputName</key>
+                        <string>Repeat Item</string>
+                        <key>OutputUUID</key>
+                        <string>EE341D6D-63B4-4EB4-B828-320592C19503</string>
+                        <key>Type</key>
+                        <string>ActionOutput</string>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFTextTokenAttachment</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.formatdate</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>UUID</key>
+                <string>9646F44D-3153-4F3F-9B60-86CF5EE50479</string>
+                <key>WFDateFormatStyle</key>
+                <string>Custom</string>
+                <key>WFDateFormat</key>
+                <string>h:mm a</string>
+                <key>WFDate</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>Aggrandizements</key>
+                        <array>
+                            <dict>
+                                <key>PropertyName</key>
+                                <string>End Date</string>
+                                <key>Type</key>
+                                <string>WFPropertyVariableAggrandizement</string>
+                            </dict>
+                        </array>
+                        <key>OutputName</key>
+                        <string>Repeat Item</string>
+                        <key>OutputUUID</key>
+                        <string>EE341D6D-63B4-4EB4-B828-320592C19503</string>
+                        <key>Type</key>
+                        <string>ActionOutput</string>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFTextTokenAttachment</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.gettext</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>UUID</key>
+                <string>A10EFCAD-2AF4-45FD-A43B-3333A062B761</string>
+                <key>WFTextActionText</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>attachmentsByRange</key>
+                        <dict>
+                            <key>{52, 1}</key>
+                            <dict>
+                                <key>Aggrandizements</key>
+                                <array>
+                                    <dict>
+                                        <key>PropertyName</key>
+                                        <string>Title</string>
+                                        <key>Type</key>
+                                        <string>WFPropertyVariableAggrandizement</string>
+                                    </dict>
+                                </array>
+                                <key>OutputName</key>
+                                <string>Repeat Item</string>
+                                <key>OutputUUID</key>
+                                <string>EE341D6D-63B4-4EB4-B828-320592C19503</string>
+                                <key>Type</key>
+                                <string>ActionOutput</string>
+                            </dict>
+                            <key>{87, 1}</key>
+                            <dict>
+                                <key>OutputName</key>
+                                <string>Formatted Date</string>
+                                <key>OutputUUID</key>
+                                <string>3FF73842-DAC1-4C30-A1AA-50AF112FF61F</string>
+                                <key>Type</key>
+                                <string>ActionOutput</string>
+                            </dict>
+                            <key>{91, 1}</key>
+                            <dict>
+                                <key>OutputName</key>
+                                <string>Formatted Date</string>
+                                <key>OutputUUID</key>
+                                <string>9646F44D-3153-4F3F-9B60-86CF5EE50479</string>
+                                <key>Type</key>
+                                <string>ActionOutput</string>
+                            </dict>
+                        </dict>
+                        <key>string</key>
+                        <string>&lt;div class=&quot;cal-event&quot;&gt;&lt;div class=&quot;cal-event-title&quot;&gt;￼&lt;/div&gt;&lt;div class=&quot;cal-event-time&quot;&gt;￼ – ￼&lt;/div&gt;&lt;/div&gt;
+</string>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFTextTokenString</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.appendvariable</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>WFVariableName</key>
+                <string>CalendarHTML</string>
+                <key>WFInput</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>OutputName</key>
+                        <string>Text</string>
+                        <key>OutputUUID</key>
+                        <string>A10EFCAD-2AF4-45FD-A43B-3333A062B761</string>
+                        <key>Type</key>
+                        <string>ActionOutput</string>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFTextTokenAttachment</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.repeat.each</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>UUID</key>
+                <string>09C6AFED-F3D6-4024-9662-9813C60E2F52</string>
+                <key>GroupingIdentifier</key>
+                <string>42FC09BD-1F6B-4417-906F-5F99B88C2F86</string>
+                <key>WFControlFlowMode</key>
+                <integer>2</integer>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.getvariable</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>UUID</key>
+                <string>4E4E95F4-E007-435A-8038-1154A2402452</string>
+                <key>WFVariable</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>Type</key>
+                        <string>Variable</string>
+                        <key>VariableName</key>
+                        <string>CalendarHTML</string>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFTextTokenAttachment</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.gettext</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>UUID</key>
+                <string>CB146AAE-F705-4B52-960F-326CA45BAFCE</string>
+                <key>WFTextActionText</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>attachmentsByRange</key>
+                        <dict>
+                            <key>{5567, 1}</key>
+                            <dict>
+                                <key>OutputName</key>
+                                <string>CalendarHTML</string>
+                                <key>OutputUUID</key>
+                                <string>4E4E95F4-E007-435A-8038-1154A2402452</string>
+                                <key>Type</key>
+                                <string>Variable</string>
+                            </dict>
+                        </dict>
+                        <key>string</key>
+                        <string>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+&lt;title&gt;Morning Dashboard&lt;/title&gt;
+&lt;style&gt;
+:root {
+    --base03:#002b36;--base02:#073642;--base01:#586e75;--base00:#657b83;
+    --base0:#839496;--base1:#93a1a1;--base2:#eee8d5;--base3:#fdf6e3;
+    --yellow:#b58900;--orange:#cb4b16;--red:#dc322f;--magenta:#d33682;
+    --violet:#6c71c4;--blue:#268bd2;--cyan:#2aa198;--green:#859900;
+    --bg:var(--base03);--bg-hl:var(--base02);--fg:var(--base0);
+    --fg-dim:var(--base01);--fg-em:var(--base1);--border:var(--base01);
+}
+@media(prefers-color-scheme:light){:root{
+    --bg:var(--base3);--bg-hl:var(--base2);--fg:var(--base00);
+    --fg-dim:var(--base1);--fg-em:var(--base01);--border:var(--base1);
+}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Courier New',Courier,monospace;background:var(--bg);color:var(--fg);font-size:14px;line-height:1.5;padding:8px;-webkit-text-size-adjust:100%}
+.term{border:1px solid var(--border);max-width:500px;margin:0 auto;overflow:hidden}
+.titlebar{background:var(--bg-hl);padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.titlebar-left{color:var(--green);font-weight:bold}
+.titlebar-left .prompt{color:var(--cyan)}
+.titlebar-right{color:var(--fg-dim);font-size:13px;text-align:right}
+.titlebar-right .date{color:var(--yellow)}
+.section{border-top:1px solid var(--border)}
+.section-head{background:var(--bg-hl);padding:8px 14px;border-bottom:1px solid var(--border);color:var(--blue);font-weight:bold;font-size:13px;letter-spacing:1px;display:flex;justify-content:space-between}
+.section-head .sub{color:var(--fg-dim);font-weight:normal;letter-spacing:0}
+.section-body{padding:12px 14px}
+.wx-hero{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.wx-icon{font-size:42px;line-height:1}
+.wx-info{flex:1}
+.wx-condition{color:var(--yellow);font-weight:bold;font-size:16px}
+.wx-temps{display:flex;gap:14px;margin-top:4px;font-size:14px}
+.wx-hi{color:var(--orange);font-weight:bold}
+.wx-lo{color:var(--blue);font-weight:bold}
+.wx-rain-pct{color:var(--cyan);font-weight:bold}
+.rain-box{border:1px solid var(--border);padding:8px 10px;margin-top:10px}
+.rain-title{color:var(--fg-dim);font-size:11px;margin-bottom:4px;letter-spacing:.5px}
+.rain-chart{white-space:pre;line-height:1.2;font-size:16px;letter-spacing:1px}
+.rain-labels{color:var(--fg-dim);font-size:11px;white-space:pre;margin-top:2px}
+.rain-lo{color:var(--green)}.rain-md{color:var(--yellow)}.rain-hi{color:var(--orange)}.rain-ex{color:var(--red)}
+.cal-event{border-left:3px solid var(--cyan);padding:4px 0 4px 10px;margin-bottom:8px}
+.cal-event:last-child{margin-bottom:0}
+.cal-event-title{color:var(--fg-em);font-weight:bold;font-size:14px}
+.cal-event-time{color:var(--yellow);font-size:13px}
+.cal-none{color:var(--fg-dim);font-style:italic}
+.game-card{border:1px solid var(--border);margin-bottom:10px;overflow:hidden}
+.game-card:last-child{margin-bottom:0}
+.game-card-head{background:var(--bg-hl);padding:5px 10px;border-bottom:1px solid var(--border);color:var(--fg-dim);font-size:12px;letter-spacing:.5px;display:flex;justify-content:space-between}
+.game-card-body{padding:10px}
+.score-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:14px}
+.score-team{width:40px;font-weight:bold;flex-shrink:0}
+.score-bar-track{flex:1;height:14px;background:var(--bg-hl);border:1px solid var(--border);overflow:hidden}
+.score-bar-fill{height:100%}
+.score-num{width:26px;text-align:right;font-weight:bold;flex-shrink:0}
+.team-cin{color:var(--red)}.team-lal{color:var(--violet)}.team-mia{color:var(--cyan)}.team-uk{color:var(--blue)}.team-opp{color:var(--fg-em)}
+.game-meta{color:var(--fg-dim);font-size:13px;margin-top:8px;line-height:1.6}
+.game-meta .pitcher{color:var(--violet)}
+.result-w{color:var(--green);font-weight:bold}
+.result-l{color:var(--red);font-weight:bold}
+.game-meta .time{color:var(--yellow)}
+.game-meta .venue{color:var(--fg-dim)}
+.matchup{display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 0 8px;font-size:18px;font-weight:bold}
+.matchup-vs{color:var(--fg-dim);font-size:12px;font-weight:normal}
+.matchup-venue{text-align:center;color:var(--fg-dim);font-size:12px;margin-bottom:8px}
+.upcoming-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.upcoming-table td{padding:3px 6px;border-bottom:1px dotted var(--border)}
+.upcoming-table td:first-child{color:var(--fg-dim);width:70px}
+.upcoming-table td:nth-child(2){color:var(--fg-em)}
+.upcoming-table td:last-child{color:var(--yellow);text-align:right}
+.none{color:var(--fg-dim);font-style:italic}
+.loading{color:var(--fg-dim);animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.error{color:var(--red)}
+.foot{border-top:1px solid var(--border);background:var(--bg-hl);padding:10px 14px;color:var(--fg-dim);font-size:12px;text-align:center}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;term&quot;&gt;
+    &lt;div class=&quot;titlebar&quot;&gt;
+        &lt;div class=&quot;titlebar-left&quot;&gt;&lt;span class=&quot;prompt&quot;&gt;&amp;#9654;&lt;/span&gt; morning-dashboard&lt;/div&gt;
+        &lt;div class=&quot;titlebar-right&quot; id=&quot;hdr&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;section&quot;&gt;
+        &lt;div class=&quot;section-head&quot;&gt;&lt;span&gt;WEATHER&lt;/span&gt;&lt;span class=&quot;sub&quot;&gt;Prospect, KY&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;section-body&quot; id=&quot;wx&quot;&gt;&lt;span class=&quot;loading&quot;&gt;loading...&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;section&quot;&gt;
+        &lt;div class=&quot;section-head&quot;&gt;&lt;span&gt;CALENDAR&lt;/span&gt;&lt;span class=&quot;sub&quot;&gt;Today&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;section-body&quot; id=&quot;cal&quot;&gt;￼&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;section&quot;&gt;
+        &lt;div class=&quot;section-head&quot;&gt;&lt;span&gt;REDS&lt;/span&gt;&lt;span class=&quot;sub&quot;&gt;Cincinnati&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;section-body&quot; id=&quot;reds&quot;&gt;&lt;span class=&quot;loading&quot;&gt;loading...&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;section&quot;&gt;
+        &lt;div class=&quot;section-head&quot;&gt;&lt;span&gt;DOLPHINS&lt;/span&gt;&lt;span class=&quot;sub&quot;&gt;Miami&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;section-body&quot; id=&quot;dolphins&quot;&gt;&lt;span class=&quot;loading&quot;&gt;loading...&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;section&quot;&gt;
+        &lt;div class=&quot;section-head&quot;&gt;&lt;span&gt;LAKERS&lt;/span&gt;&lt;span class=&quot;sub&quot;&gt;Los Angeles&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;section-body&quot; id=&quot;lakers&quot;&gt;&lt;span class=&quot;loading&quot;&gt;loading...&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;section&quot;&gt;
+        &lt;div class=&quot;section-head&quot;&gt;&lt;span&gt;UK BASKETBALL&lt;/span&gt;&lt;span class=&quot;sub&quot;&gt;Kentucky&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;section-body&quot; id=&quot;ukbb&quot;&gt;&lt;span class=&quot;loading&quot;&gt;loading...&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;section&quot;&gt;
+        &lt;div class=&quot;section-head&quot;&gt;&lt;span&gt;UK FOOTBALL&lt;/span&gt;&lt;span class=&quot;sub&quot;&gt;Kentucky&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;section-body&quot; id=&quot;ukfb&quot;&gt;&lt;span class=&quot;loading&quot;&gt;loading...&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;foot&quot; id=&quot;foot&quot;&gt;loading...&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+const TZ='America/New_York', LAT=38.40, LON=-85.61;
+const esc=s=&gt;{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
+const todayStr=()=&gt;new Date().toLocaleDateString('en-CA',{timeZone:TZ});
+const yesterdayStr=()=&gt;{const d=new Date();d.setDate(d.getDate()-1);return d.toLocaleDateString('en-CA',{timeZone:TZ})};
+const todayESPN=()=&gt;todayStr().replace(/-/g,'');
+const yesterdayESPN=()=&gt;yesterdayStr().replace(/-/g,'');
+
+// Header
+function renderHeader(){
+    const now=new Date();
+    const date=now.toLocaleDateString('en-US',{timeZone:TZ,weekday:'short',month:'short',day:'numeric'});
+    const time=now.toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+    document.getElementById('hdr').innerHTML=`&lt;span class=&quot;date&quot;&gt;${esc(date)}&lt;/span&gt; &amp;middot; ${esc(time)}`;
+    document.getElementById('foot').textContent=`Generated ${date} at ${time} via Shortcuts`;
+}
+
+// Calendar fallback
+function checkCal(){
+    const el=document.getElementById('cal');
+    if(!el.innerHTML.trim()||el.innerHTML.trim()==='')
+        el.innerHTML='&lt;span class=&quot;cal-none&quot;&gt;No events today&lt;/span&gt;';
+}
+
+// Weather
+const WMO={0:'Clear',1:'Mostly Clear',2:'Partly Cloudy',3:'Overcast',45:'Fog',48:'Fog',51:'Light Drizzle',53:'Drizzle',55:'Heavy Drizzle',61:'Light Rain',63:'Rain',65:'Heavy Rain',71:'Light Snow',73:'Snow',75:'Heavy Snow',80:'Light Showers',81:'Showers',82:'Heavy Showers',95:'Thunderstorm',96:'T-Storm + Hail',99:'T-Storm + Hail'};
+const WMO_ICON={0:'\u2600\uFE0F',1:'\uD83C\uDF24\uFE0F',2:'\u26C5',3:'\u2601\uFE0F',45:'\uD83C\uDF2B\uFE0F',48:'\uD83C\uDF2B\uFE0F',51:'\uD83C\uDF26\uFE0F',53:'\uD83C\uDF26\uFE0F',55:'\uD83C\uDF27\uFE0F',61:'\uD83C\uDF26\uFE0F',63:'\uD83C\uDF27\uFE0F',65:'\uD83C\uDF27\uFE0F',71:'\uD83C\uDF28\uFE0F',73:'\uD83C\uDF28\uFE0F',75:'\u2744\uFE0F',80:'\uD83C\uDF26\uFE0F',81:'\uD83C\uDF27\uFE0F',82:'\u26C8\uFE0F',95:'\u26C8\uFE0F',96:'\u26C8\uFE0F',99:'\u26C8\uFE0F'};
+
+function rainBlock(pct){
+    const blocks=' \u2581\u2582\u2583\u2584\u2585\u2586\u2587\u2588';
+    const i=Math.min(8,Math.round(pct/100*8));
+    const cls=pct&gt;60?'rain-ex':pct&gt;40?'rain-hi':pct&gt;20?'rain-md':'rain-lo';
+    return `&lt;span class=&quot;${cls}&quot;&gt;${blocks[i]}&lt;/span&gt;`;
+}
+
+async function loadWeather(){
+    const el=document.getElementById('wx');
+    try{
+        const url=`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&amp;longitude=${LON}&amp;daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&amp;hourly=precipitation_probability&amp;temperature_unit=fahrenheit&amp;timezone=${TZ}&amp;forecast_days=1`;
+        const data=await(await fetch(url)).json();
+        const hi=Math.round(data.daily.temperature_2m_max[0]),lo=Math.round(data.daily.temperature_2m_min[0]);
+        const code=data.daily.weathercode[0],rainMax=data.daily.precipitation_probability_max[0];
+        const cond=WMO[code]||'Unknown',icon=WMO_ICON[code]||'?';
+        const hourly=data.hourly.precipitation_probability.slice(0,24);
+        let bars='';for(let i=6;i&lt;=23;i++)bars+=rainBlock(hourly[i]);
+        el.innerHTML=`&lt;div class=&quot;wx-hero&quot;&gt;&lt;span class=&quot;wx-icon&quot;&gt;${icon}&lt;/span&gt;&lt;div class=&quot;wx-info&quot;&gt;&lt;div class=&quot;wx-condition&quot;&gt;${esc(cond)}&lt;/div&gt;&lt;div class=&quot;wx-temps&quot;&gt;&lt;span&gt;\u25B2 &lt;span class=&quot;wx-hi&quot;&gt;${hi}\u00B0F&lt;/span&gt;&lt;/span&gt;&lt;span&gt;\u25BC &lt;span class=&quot;wx-lo&quot;&gt;${lo}\u00B0F&lt;/span&gt;&lt;/span&gt;&lt;span&gt;\u2602 &lt;span class=&quot;wx-rain-pct&quot;&gt;${rainMax}%&lt;/span&gt;&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&lt;div class=&quot;rain-box&quot;&gt;&lt;div class=&quot;rain-title&quot;&gt;HOURLY RAIN %&lt;/div&gt;&lt;div class=&quot;rain-chart&quot;&gt;${bars}&lt;/div&gt;&lt;div class=&quot;rain-labels&quot;&gt;6a    9a    12p   3p    6p    9p&lt;/div&gt;&lt;/div&gt;`;
+    }catch(e){el.innerHTML=`&lt;span class=&quot;error&quot;&gt;\u2717 ${esc(e.message)}&lt;/span&gt;`}
+}
+
+// MLB Reds
+const REDS_ID=113;
+const MLB_TEAMS={'Cincinnati Reds':'CIN','St. Louis Cardinals':'STL','Chicago Cubs':'CHC','Milwaukee Brewers':'MIL','Pittsburgh Pirates':'PIT','Atlanta Braves':'ATL','New York Mets':'NYM','Philadelphia Phillies':'PHI','Washington Nationals':'WSH','Miami Marlins':'MIA','Los Angeles Dodgers':'LAD','San Francisco Giants':'SF','San Diego Padres':'SD','Arizona Diamondbacks':'ARI','Colorado Rockies':'COL','New York Yankees':'NYY','Boston Red Sox':'BOS','Tampa Bay Rays':'TB','Toronto Blue Jays':'TOR','Baltimore Orioles':'BAL','Minnesota Twins':'MIN','Cleveland Guardians':'CLE','Chicago White Sox':'CWS','Detroit Tigers':'DET','Kansas City Royals':'KC','Houston Astros':'HOU','Texas Rangers':'TEX','Seattle Mariners':'SEA','Los Angeles Angels':'LAA','Oakland Athletics':'OAK'};
+const mlbAbbr=name=&gt;MLB_TEAMS[name]||name.slice(0,3).toUpperCase();
+
+function noGameCard(label){return `&lt;div class=&quot;game-card&quot;&gt;&lt;div class=&quot;game-card-head&quot;&gt;&lt;span&gt;${esc(label)}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;game-card-body&quot;&gt;&lt;span class=&quot;none&quot;&gt;No game&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;`}
+
+function mlbScoreCard(game,label){
+    const isHome=game.teams.home.team.id===REDS_ID;
+    const reds=isHome?game.teams.home:game.teams.away;
+    const opp=isHome?game.teams.away:game.teams.home;
+    const rR=reds.score??0,oR=opp.score??0,maxR=Math.max(rR,oR,1);
+    const won=rR&gt;oR;const oppA=mlbAbbr(opp.team.name);
+    const dec=game.decisions||{};
+    let meta='';
+    if(dec.winner)meta+=`&lt;span class=&quot;result-w&quot;&gt;W&lt;/span&gt;: &lt;span class=&quot;pitcher&quot;&gt;${esc(dec.winner.fullName)}&lt;/span&gt;`;
+    if(dec.loser)meta+=` &amp;middot; &lt;span class=&quot;result-l&quot;&gt;L&lt;/span&gt;: &lt;span class=&quot;pitcher&quot;&gt;${esc(dec.loser.fullName)}&lt;/span&gt;`;
+    if(dec.save)meta+=` &amp;middot; S: &lt;span class=&quot;pitcher&quot;&gt;${esc(dec.save.fullName)}&lt;/span&gt;`;
+    return `&lt;div class=&quot;game-card&quot;&gt;&lt;div class=&quot;game-card-head&quot;&gt;&lt;span&gt;${esc(label)}&lt;/span&gt;&lt;span&gt;${won?'&lt;span class=&quot;result-w&quot;&gt;WIN&lt;/span&gt;':'&lt;span class=&quot;result-l&quot;&gt;LOSS&lt;/span&gt;'}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;game-card-body&quot;&gt;&lt;div class=&quot;score-row&quot;&gt;&lt;span class=&quot;score-team team-cin&quot;&gt;CIN&lt;/span&gt;&lt;div class=&quot;score-bar-track&quot;&gt;&lt;div class=&quot;score-bar-fill&quot; style=&quot;width:${maxR&gt;0?rR/maxR*100:0}%;background:var(--red)&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;score-num team-cin&quot;&gt;${rR}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;score-row&quot;&gt;&lt;span class=&quot;score-team team-opp&quot;&gt;${esc(oppA)}&lt;/span&gt;&lt;div class=&quot;score-bar-track&quot;&gt;&lt;div class=&quot;score-bar-fill&quot; style=&quot;width:${maxR&gt;0?oR/maxR*100:0}%;background:var(--fg-dim)&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;score-num team-opp&quot;&gt;${oR}&lt;/span&gt;&lt;/div&gt;${meta?`&lt;div class=&quot;game-meta&quot;&gt;${meta}&lt;/div&gt;`:''}&lt;/div&gt;&lt;/div&gt;`;
+}
+
+function mlbScheduledCard(game){
+    const isHome=game.teams.home.team.id===REDS_ID;
+    const opp=isHome?game.teams.away:game.teams.home;const oppA=mlbAbbr(opp.team.name);
+    const vs=isHome?'vs':'@';
+    const time=new Date(game.gameDate).toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+    return `&lt;div class=&quot;game-card&quot;&gt;&lt;div class=&quot;game-card-head&quot;&gt;&lt;span&gt;TODAY&lt;/span&gt;&lt;span class=&quot;time&quot;&gt;${esc(time)} ET&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;game-card-body&quot;&gt;&lt;div class=&quot;matchup&quot;&gt;&lt;span class=&quot;team-cin&quot;&gt;CIN&lt;/span&gt;&lt;span class=&quot;matchup-vs&quot;&gt;${vs}&lt;/span&gt;&lt;span class=&quot;team-opp&quot;&gt;${esc(oppA)}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`;
+}
+
+async function loadReds(){
+    const el=document.getElementById('reds');
+    try{
+        const[yD,tD]=await Promise.all([
+            fetch(`https://statsapi.mlb.com/api/v1/schedule?teamId=${REDS_ID}&amp;date=${yesterdayStr()}&amp;sportId=1&amp;hydrate=probablePitcher,linescore,decisions,team`).then(r=&gt;r.json()),
+            fetch(`https://statsapi.mlb.com/api/v1/schedule?teamId=${REDS_ID}&amp;date=${todayStr()}&amp;sportId=1&amp;hydrate=probablePitcher,linescore,decisions,team`).then(r=&gt;r.json())
+        ]);
+        let html='';
+        const yg=yD.dates?.[0]?.games?.[0];
+        if(yg){const st=yg.status?.detailedState||'';html+=(st.startsWith('Final')||st==='Game Over')?mlbScoreCard(yg,'YESTERDAY'):noGameCard('YESTERDAY')}else html+=noGameCard('YESTERDAY');
+        const tg=tD.dates?.[0]?.games?.[0];
+        if(tg){const st=tg.status?.detailedState||'';if(st.startsWith('Final')||st==='Game Over')html+=mlbScoreCard(tg,'TODAY \u2014 FINAL');else if(st==='In Progress'||st.includes('Progress'))html+=mlbScoreCard(tg,'LIVE');else html+=mlbScheduledCard(tg)}else html+=noGameCard('TODAY');
+        el.innerHTML=html;
+    }catch(e){el.innerHTML=`&lt;span class=&quot;error&quot;&gt;\u2717 ${esc(e.message)}&lt;/span&gt;`}
+}
+
+// ESPN helper for NBA/NFL/College
+function findESPNGame(data,teamId){
+    if(!data?.events)return null;
+    for(const ev of data.events){const c=ev.competitions?.[0];if(c&amp;&amp;c.competitors.some(x=&gt;x.team.id===teamId))return c}return null;
+}
+
+function espnScoreCard(comp,teamId,teamAbbr,teamClass,color,label){
+    const mine=comp.competitors.find(c=&gt;c.team.id===teamId);
+    const opp=comp.competitors.find(c=&gt;c.team.id!==teamId);
+    const mS=parseInt(mine.score)||0,oS=parseInt(opp.score)||0,maxS=Math.max(mS,oS,1);
+    const won=mine.winner;const oppA=opp.team.abbreviation;
+    return `&lt;div class=&quot;game-card&quot;&gt;&lt;div class=&quot;game-card-head&quot;&gt;&lt;span&gt;${esc(label)}&lt;/span&gt;&lt;span&gt;${won?'&lt;span class=&quot;result-w&quot;&gt;WIN&lt;/span&gt;':'&lt;span class=&quot;result-l&quot;&gt;LOSS&lt;/span&gt;'}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;game-card-body&quot;&gt;&lt;div class=&quot;score-row&quot;&gt;&lt;span class=&quot;score-team ${teamClass}&quot;&gt;${esc(teamAbbr)}&lt;/span&gt;&lt;div class=&quot;score-bar-track&quot;&gt;&lt;div class=&quot;score-bar-fill&quot; style=&quot;width:${mS/maxS*100}%;background:var(--${color})&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;score-num ${teamClass}&quot;&gt;${mS}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;score-row&quot;&gt;&lt;span class=&quot;score-team team-opp&quot;&gt;${esc(oppA)}&lt;/span&gt;&lt;div class=&quot;score-bar-track&quot;&gt;&lt;div class=&quot;score-bar-fill&quot; style=&quot;width:${oS/maxS*100}%;background:var(--fg-dim)&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;span class=&quot;score-num team-opp&quot;&gt;${oS}&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;game-meta&quot;&gt;&lt;span class=&quot;venue&quot;&gt;@ ${esc(comp.venue?.fullName||'')} (${mine.homeAway==='home'?'Home':'Away'})&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`;
+}
+
+function espnScheduledCard(comp,teamId,teamAbbr,teamClass){
+    const mine=comp.competitors.find(c=&gt;c.team.id===teamId);
+    const opp=comp.competitors.find(c=&gt;c.team.id!==teamId);
+    const vs=mine.homeAway==='home'?'vs':'@';const oppA=opp.team.abbreviation;
+    const time=new Date(comp.date).toLocaleTimeString('en-US',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+    return `&lt;div class=&quot;game-card&quot;&gt;&lt;div class=&quot;game-card-head&quot;&gt;&lt;span&gt;TODAY&lt;/span&gt;&lt;span class=&quot;time&quot;&gt;${esc(time)} ET&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;game-card-body&quot;&gt;&lt;div class=&quot;matchup&quot;&gt;&lt;span class=&quot;${teamClass}&quot;&gt;${esc(teamAbbr)}&lt;/span&gt;&lt;span class=&quot;matchup-vs&quot;&gt;${vs}&lt;/span&gt;&lt;span class=&quot;team-opp&quot;&gt;${esc(oppA)}&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;`;
+}
+
+async function loadESPNTeam(elId,sport,league,teamId,teamAbbr,teamClass,color){
+    const el=document.getElementById(elId);
+    try{
+        const[yD,tD]=await Promise.all([
+            fetch(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard?dates=${yesterdayESPN()}`).then(r=&gt;r.json()),
+            fetch(`https://site.api.espn.com/apis/site/v2/sports/${sport}/${league}/scoreboard?dates=${todayESPN()}`).then(r=&gt;r.json())
+        ]);
+        let html='';
+        const yC=findESPNGame(yD,teamId);
+        if(yC&amp;&amp;yC.status?.type?.completed)html+=espnScoreCard(yC,teamId,teamAbbr,teamClass,color,'YESTERDAY');
+        else html+=noGameCard('YESTERDAY');
+        const tC=findESPNGame(tD,teamId);
+        if(tC){
+            const st=tC.status?.type;
+            if(st?.completed)html+=espnScoreCard(tC,teamId,teamAbbr,teamClass,color,'TODAY \u2014 FINAL');
+            else if(st?.state==='in')html+=espnScoreCard(tC,teamId,teamAbbr,teamClass,color,'LIVE');
+            else html+=espnScheduledCard(tC,teamId,teamAbbr,teamClass);
+        }else html+=noGameCard('TODAY');
+        el.innerHTML=html;
+    }catch(e){el.innerHTML=`&lt;span class=&quot;error&quot;&gt;\u2717 ${esc(e.message)}&lt;/span&gt;`}
+}
+
+// Init
+renderHeader();
+checkCal();
+loadWeather();
+loadReds();
+loadESPNTeam('dolphins','football','nfl','15','MIA','team-mia','cyan');
+loadESPNTeam('lakers','basketball','nba','13','LAL','team-lal','violet');
+loadESPNTeam('ukbb','basketball','mens-college-basketball','96','UK','team-uk','blue');
+loadESPNTeam('ukfb','football','college-football','96','UK','team-uk','blue');
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</string>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFTextTokenString</string>
+                </dict>
+            </dict>
+        </dict>
+        <dict>
+            <key>WFWorkflowActionIdentifier</key>
+            <string>is.workflow.actions.quicklook</string>
+            <key>WFWorkflowActionParameters</key>
+            <dict>
+                <key>WFInput</key>
+                <dict>
+                    <key>Value</key>
+                    <dict>
+                        <key>OutputName</key>
+                        <string>Text</string>
+                        <key>OutputUUID</key>
+                        <string>CB146AAE-F705-4B52-960F-326CA45BAFCE</string>
+                        <key>Type</key>
+                        <string>ActionOutput</string>
+                    </dict>
+                    <key>WFSerializationType</key>
+                    <string>WFTextTokenAttachment</string>
+                </dict>
+            </dict>
+        </dict>
+    </array>
+    <key>WFWorkflowClientVersion</key>
+    <string>2700.0.4</string>
+    <key>WFWorkflowHasOutputFallback</key>
+    <false/>
+    <key>WFWorkflowIcon</key>
+    <dict>
+        <key>WFWorkflowIconGlyphNumber</key>
+        <integer>59511</integer>
+        <key>WFWorkflowIconStartColor</key>
+        <integer>4282601983</integer>
+    </dict>
+    <key>WFWorkflowImportQuestions</key>
+    <array/>
+    <key>WFWorkflowMinimumClientVersion</key>
+    <integer>900</integer>
+    <key>WFWorkflowMinimumClientVersionString</key>
+    <string>900</string>
+    <key>WFWorkflowName</key>
+    <string>Morning Dashboard</string>
+    <key>WFWorkflowOutputContentItemClasses</key>
+    <array/>
+    <key>WFWorkflowTypes</key>
+    <array/>
+</dict>
+</plist>
